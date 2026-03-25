@@ -11,200 +11,45 @@ interface HomePageProps {
 export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePageProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Use featured skins if available, otherwise use latest skins for hero
-  const heroSlides = featuredSkins.length > 0 ? featuredSkins : latestSkins.slice(0, 3);
+  // Static hero slides - mascot welcome + free bulls pack
+  const heroSlideCount = 2;
 
   // Auto-advance slides
   useEffect(() => {
-    if (heroSlides.length <= 1) return;
-    
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
-    
+      setCurrentSlide((prev) => (prev + 1) % heroSlideCount);
+    }, 6000);
+
     return () => clearInterval(interval);
-  }, [heroSlides.length]);
+  }, []);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    setCurrentSlide((prev) => (prev + 1) % heroSlideCount);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+    setCurrentSlide((prev) => (prev - 1 + heroSlideCount) % heroSlideCount);
   };
 
   return (
     <div className="min-h-screen">
       {/* Hero Section with Slider */}
-      <div className="relative h-screen flex items-center justify-center overflow-hidden">
-        {heroSlides.length > 0 ? (
-          <>
-            {/* Slider Background */}
-            {heroSlides.map((skin, index) => (
-              <div
-                key={skin.id}
-                className={`absolute inset-0 transition-opacity duration-1000 ${
-                  index === currentSlide ? 'opacity-100' : 'opacity-0'
-                }`}
-              >
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${skin.images[0] || skin.thumbnail})` }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/95 via-cyan-900/80 to-cyan-950"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-950/85 via-transparent to-cyan-950/85"></div>
-                </div>
-              </div>
-            ))}
+      <div className="relative h-screen flex items-center overflow-hidden">
 
-            {/* Slider Content - Enhanced Layout */}
-            <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                {/* Left: Text Content */}
-                {heroSlides.map((skin, index) => (
-                  <div
-                    key={`content-${skin.id}`}
-                    className={`transition-all duration-1000 ${
-                      index === currentSlide ? 'opacity-100 translate-x-0' : 'opacity-0 absolute -translate-x-8 pointer-events-none'
-                    }`}
-                  >
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-orange-500/20 border border-orange-500/30 rounded-full mb-6">
-                      <Sparkles className="w-4 h-4 text-orange-400" />
-                      <span className="text-sm text-orange-300">Featured Skin Pack</span>
-                    </div>
-                    
-                    <h1 className="mb-4 text-5xl lg:text-6xl bg-gradient-to-r from-white via-orange-200 to-cyan-200 bg-clip-text text-transparent leading-tight">
-                      {skin.name}
-                    </h1>
-                    
-                    <div className="flex items-center gap-3 mb-6">
-                      <span className="px-4 py-2 bg-slate-900/80 backdrop-blur border border-orange-500/20 rounded-lg text-orange-400">
-                        {skin.gameName}
-                      </span>
-                      <span className="px-4 py-2 bg-slate-900/80 backdrop-blur border border-slate-700/50 rounded-lg text-gray-400">
-                        {skin.fileSize}
-                      </span>
-                    </div>
+        {/* Slide 1: Mascot Hero (Default) */}
+        <div className={`absolute inset-0 transition-opacity duration-1000 ${currentSlide === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+          {/* Background image */}
+          <img
+            src="/images/brand/hero.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/30 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/50 via-transparent to-slate-950"></div>
 
-                    <p className="text-lg text-gray-300 mb-8 leading-relaxed max-w-xl">
-                      {skin.description || 'Transform your gaming experience with this exclusive, professionally crafted skin pack featuring stunning visuals and attention to detail.'}
-                    </p>
-
-                    {/* Stats */}
-                    <div className="flex items-center gap-6 mb-8 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Download className="w-5 h-5 text-orange-400" />
-                        <span className="text-gray-400">{skin.downloads.toLocaleString()} downloads</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-gray-400">{skin.rating} rating</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5 text-green-400" />
-                        <span className="text-gray-400">Trending</span>
-                      </div>
-                    </div>
-
-                    {/* CTA Buttons */}
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() => onNavigate('skin', skin.id)}
-                        className="group px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all flex items-center gap-3 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40"
-                      >
-                        <span className="text-lg">Get Now</span>
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                      </button>
-
-                      <div className="flex items-center gap-3 px-6 py-4 bg-slate-900/90 backdrop-blur border border-orange-500/20 rounded-xl">
-                        <span className="text-sm text-gray-400">Only</span>
-                        <span className="text-3xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">
-                          ${skin.price}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Right: Preview Image */}
-                {heroSlides.map((skin, index) => (
-                  <div
-                    key={`preview-${skin.id}`}
-                    className={`hidden lg:block transition-all duration-1000 ${
-                      index === currentSlide ? 'opacity-100 translate-x-0' : 'opacity-0 absolute translate-x-8 pointer-events-none'
-                    }`}
-                  >
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-400 rounded-3xl blur-3xl opacity-20"></div>
-                      <img
-                        src={skin.images[0] || skin.thumbnail}
-                        alt={skin.name}
-                        className="relative rounded-2xl border border-orange-500/20 shadow-2xl w-full"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Slider Controls */}
-            {heroSlides.length > 1 && (
-              <>
-                <button
-                  onClick={prevSlide}
-                  className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-slate-900/80 hover:bg-orange-500/20 backdrop-blur border border-orange-500/20 rounded-full flex items-center justify-center transition-all hover:scale-110"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-slate-900/80 hover:bg-orange-500/20 backdrop-blur border border-orange-500/20 rounded-full flex items-center justify-center transition-all hover:scale-110"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-
-                {/* Slide Indicators */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-slate-900/80 backdrop-blur px-4 py-3 rounded-full border border-orange-500/20">
-                  {heroSlides.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentSlide(index)}
-                      className={`h-2 rounded-full transition-all ${
-                        index === currentSlide 
-                          ? 'w-8 bg-gradient-to-r from-orange-500 to-orange-400' 
-                          : 'w-2 bg-slate-600 hover:bg-slate-500'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            {/* Court background */}
-            <div className="absolute inset-0">
-              <img
-                src="/images/brand/fog-court.jpg"
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-transparent to-slate-950/50"></div>
-              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-transparent to-slate-950"></div>
-            </div>
-
-            {/* Mascot image - right side */}
-            <div className="absolute right-0 top-0 bottom-0 w-1/2 lg:w-[55%] hidden md:flex items-end justify-center overflow-hidden">
-              <img
-                src="/images/brand/mascot-hero.jpg"
-                alt="2K Terry's Mods Mascot"
-                className="h-full w-full object-cover object-top"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-transparent"></div>
-            </div>
-
-            {/* Text content - left side */}
-            <div className="relative z-10 text-left px-6 lg:px-16 max-w-3xl">
+          {/* Text content - left side */}
+          <div className="relative z-10 h-full flex items-center">
+            <div className="text-left px-6 lg:px-16 max-w-3xl">
               <h1 className="mb-4 text-5xl lg:text-7xl font-bold text-white leading-tight tracking-tight">
                 WELCOME TO<br />2K TERRYS MODS
               </h1>
@@ -219,8 +64,81 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
-          </>
-        )}
+          </div>
+        </div>
+
+        {/* Slide 2: Free Bulls Cyberface Pack */}
+        <div className={`absolute inset-0 transition-opacity duration-1000 ${currentSlide === 1 ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+          {/* Background */}
+          <img
+            src="/images/brand/fog-court.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-transparent to-slate-950"></div>
+
+          {/* Bulls pack image overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <img
+              src="/images/brand/bulls-cyberface.jpg"
+              alt="Bulls Complete Cyberface Pack"
+              className="w-full h-full object-contain object-center max-w-5xl"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-slate-950/40"></div>
+          </div>
+
+          {/* Text overlay */}
+          <div className="relative z-10 h-full flex items-end pb-32">
+            <div className="text-left px-6 lg:px-16 max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full mb-4">
+                <Sparkles className="w-4 h-4 text-green-400" />
+                <span className="text-sm text-green-300">FREE Download</span>
+              </div>
+              <h1 className="mb-4 text-4xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+                BULLS COMPLETE<br />CYBERFACE PACK
+              </h1>
+              <p className="text-lg text-gray-300 mb-6 max-w-lg">
+                Full Chicago Bulls roster cyberfaces — FREE giveaway pack with all current players
+              </p>
+              <button
+                onClick={() => onNavigate('skin', '2')}
+                className="px-8 py-4 bg-orange-500 hover:bg-orange-600 rounded-lg transition-all flex items-center gap-2 group text-white font-semibold"
+              >
+                <span>Download Free</span>
+                <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Slider Controls */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-slate-900/80 hover:bg-orange-500/20 backdrop-blur border border-orange-500/20 rounded-full flex items-center justify-center transition-all hover:scale-110"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-slate-900/80 hover:bg-orange-500/20 backdrop-blur border border-orange-500/20 rounded-full flex items-center justify-center transition-all hover:scale-110"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+
+        {/* Slide Indicators */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-slate-900/80 backdrop-blur px-4 py-3 rounded-full border border-orange-500/20">
+          {[0, 1].map((index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`h-2 rounded-full transition-all ${
+                index === currentSlide
+                  ? 'w-8 bg-gradient-to-r from-orange-500 to-orange-400'
+                  : 'w-2 bg-slate-600 hover:bg-slate-500'
+              }`}
+            />
+          ))}
+        </div>
 
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-slate-950 to-transparent"></div>
       </div>
