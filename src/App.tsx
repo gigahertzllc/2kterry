@@ -101,12 +101,28 @@ export default function App() {
     }
   };
 
-  const handleAdminLoginSuccess = (session: any, admin: any) => {
+  const handleAdminLoginSuccess = async (session: any, admin: any) => {
     setIsAdminLoggedIn(true);
     setAdminSession(session);
     setAdminData(admin);
     setShowAdminLogin(false);
     setCurrentPage('dashboard');
+
+    // Sync: clear old Supabase data and push correct defaults
+    try {
+      const { skinPacks: remotePacks } = await api.getSkinPacks();
+      // Delete all existing remote packs
+      for (const pack of remotePacks) {
+        try { await api.deleteSkinPack(pack.id); } catch (e) { /* ignore */ }
+      }
+      // Push current defaults to Supabase
+      for (const pack of defaultSkinPacks) {
+        try { await api.createSkinPack(pack); } catch (e) { /* ignore */ }
+      }
+      console.log('Synced default products to Supabase');
+    } catch (e) {
+      console.log('Could not sync to Supabase (offline mode)');
+    }
   };
 
   const handleAddSkinPack = async (newSkinPack: Omit<SkinPack, 'id'>) => {
