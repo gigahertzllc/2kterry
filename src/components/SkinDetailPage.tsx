@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { ArrowLeft, Download, Star, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Download, Star, ShoppingCart, ChevronLeft, ChevronRight, Loader } from 'lucide-react';
 import { SkinPack } from '../types';
+import { STRIPE_CONFIG } from '../config/stripe';
+import { toast } from 'sonner';
+import * as api from '../utils/api';
 
 interface SkinDetailPageProps {
   skin: SkinPack;
@@ -10,6 +13,7 @@ interface SkinDetailPageProps {
 export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % skin.images.length);
@@ -17,6 +21,44 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + skin.images.length) % skin.images.length);
+  };
+
+  const handleCheckout = async () => {
+    // Free mods: Direct download
+    if (skin.price === 0) {
+      if ((skin as any).downloadUrl) {
+        window.open((skin as any).downloadUrl, '_blank');
+      }
+      return;
+    }
+
+    // Paid mods: Stripe checkout
+    if (!STRIPE_CONFIG.isConfigured()) {
+      toast.info('Payments coming soon! Stripe configuration needed.');
+      return;
+    }
+
+    setIsCheckingOut(true);
+    try {
+      const priceInCents = Math.round(skin.price * 100);
+      const { sessionId } = await api.createCheckoutSession({
+        skinPackId: skin.id,
+        skinPackName: skin.name,
+        priceInCents
+      });
+
+      const stripe = await STRIPE_CONFIG.getStripe();
+      const { error } = await stripe.redirectToCheckout({ sessionId });
+
+      if (error) {
+        toast.error('Checkout error: ' + error.message);
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Failed to start checkout. Please try again.');
+    } finally {
+      setIsCheckingOut(false);
+    }
   };
 
   return (
@@ -128,15 +170,21 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
                 </div>
 
                 <button
-                  onClick={() => {
-                    if ((skin as any).downloadUrl) {
-                      window.open((skin as any).downloadUrl, '_blank');
-                    }
-                  }}
-                  className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-3 group mb-4"
+                  onClick={handleCheckout}
+                  disabled={isCheckingOut}
+                  className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-3 group mb-4 disabled:opacity-75 disabled:cursor-not-allowed"
                 >
-                  <ShoppingCart className="w-5 h-5" />
-                  <span>{skin.price === 0 ? 'Download Free' : 'Add to Cart'}</span>
+                  {isCheckingOut ? (
+                    <>
+                      <Loader className="w-5 h-5 animate-spin" />
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-5 h-5" />
+                      <span>{skin.price === 0 ? 'Download Free' : 'Buy Now'}</span>
+                    </>
+                  )}
                 </button>
 
                 <button className="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-lg transition-all flex items-center justify-center gap-3">

@@ -411,12 +411,34 @@ export async function updateOrderStatus(orderId: string, status: string) {
     headers,
     body: JSON.stringify({ status }),
   });
-  
+
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.error || 'Failed to update order');
   }
-  
+
   const data = await response.json();
   return data;
+}
+
+// Stripe Checkout API
+export async function createCheckoutSession(params: {
+  skinPackId: string;
+  skinPackName: string;
+  priceInCents: number;
+  customerEmail?: string;
+}) {
+  const response = await fetch(`${API_URL}/checkout/create-session`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(params),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to create checkout session');
+  }
+
+  const data = await response.json();
+  return { sessionId: data.sessionId, clientSecret: data.clientSecret };
 }

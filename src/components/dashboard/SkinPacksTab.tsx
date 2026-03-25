@@ -1,7 +1,11 @@
 import { useState } from 'react';
-import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil } from 'lucide-react';
+import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Game, SkinPack } from '../../types';
 import * as api from '../../utils/api';
+import { toast } from 'sonner';
+import { UploadProgress } from '../ui/UploadProgress';
+import { ConfirmationModal } from '../ui/ConfirmationModal';
+import { uploadFileWithProgress, validateFile, formatFileSize } from '../../utils/storage';
 
 interface SkinPacksTabProps {
   games: Game[];
@@ -26,10 +30,15 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
   });
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadedImagePaths, setUploadedImagePaths] = useState<string[]>([]);
+  const [imageUploadProgress, setImageUploadProgress] = useState<{ [key: string]: number }>({});
   const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [fileUploadProgress, setFileUploadProgress] = useState(0);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [uploadedFilePath, setUploadedFilePath] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleOpenEditModal = (skin: SkinPack) => {
     setEditingSkinPack(skin);
@@ -65,15 +74,15 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.gameId || !formData.price) {
-      alert('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
       return;
     }
 
     const game = games.find(g => g.id === formData.gameId);
     const imagesToStore = uploadedImagePaths.length > 0 ? uploadedImagePaths : [game?.image || ''];
-    
+
     const newSkinPack: Omit<SkinPack, 'id'> = {
       name: formData.name,
       description: formData.description,
@@ -92,8 +101,10 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
 
     if (editingSkinPack) {
       onUpdateSkinPack(editingSkinPack.id, newSkinPack);
+      toast.success('Skin pack updated successfully!');
     } else {
       onAddSkinPack(newSkinPack);
+      toast.success('Skin pack created successfully!');
     }
 
     handleCloseModal();
@@ -104,14 +115,25 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     setIsUploadingImages(true);
 
     const files = Array.from(e.target.files);
+    const newProgress: { [key: string]: number } = {};
 
     try {
       const blobUrls = files.map(file => URL.createObjectURL(file));
       const uploadPromises = files.map(async (file) => {
+        const fileKey = `${file.name}-${file.size}`;
+        newProgress[fileKey] = 0;
+        setImageUploadProgress({ ...newProgress });
+
         try {
-          return await api.uploadImage(file);
+          return await uploadFileWithProgress(file, 'upload-image', {
+            onProgress: (progress) => {
+              newProgress[fileKey] = progress;
+              setImageUploadProgress({ ...newProgress });
+            }
+          });
         } catch (error) {
           console.error(`Error uploading ${file.name}:`, error);
+          toast.error(`Failed to upload ${file.name}`);
           // If upload fails, use blob URL as fallback
           return { path: URL.createObjectURL(file) };
         }
@@ -122,10 +144,12 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
 
       setUploadedImages(prev => [...prev, ...blobUrls]);
       setUploadedImagePaths(prev => [...prev, ...paths]);
+      setImageUploadProgress({});
       setIsUploadingImages(false);
+      toast.success(`${files.length} image(s) uploaded successfully`);
     } catch (error) {
       console.error('Error uploading images:', error);
-      alert(`Failed to upload images: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(`Failed to upload images: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setIsUploadingImages(false);
     }
   };
@@ -135,22 +159,62 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     setUploadedImagePaths(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleDeleteClick = (skinId: string) => {
+    setDeleteTargetId(skinId);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) return;
+    setIsDeleting(true);
+    try {
+      onDeleteSkinPack(deleteTargetId);
+      toast.success('Skin pack deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete skin pack');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+      setDeleteTargetId(null);
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
-    setIsUploadingFile(true);
 
     const file = e.target.files[0];
-    
+
+    // Validate file before upload
+    const validation = validateFile(file, {
+      maxSizeBytes: 50 * 1024 * 1024, // 50MB
+      allowedTypes: ['application/zip']
+    });
+
+    if (!validation.valid) {
+      toast.error(validation.error || 'File validation failed');
+      return;
+    }
+
+    setIsUploadingFile(true);
+    setFileUploadProgress(0);
+
     try {
-      const uploadResult = await api.uploadSkinPackFile(file);
+      const uploadResult = await uploadFileWithProgress(file, 'upload-file', {
+        onProgress: (progress) => {
+          setFileUploadProgress(progress);
+        }
+      });
       const path = uploadResult.path;
-      
+
       setUploadedFilePath(path);
       setUploadedFile(file.name);
+      setFileUploadProgress(0);
       setIsUploadingFile(false);
+      toast.success(`${file.name} uploaded successfully`);
     } catch (error) {
       console.error('Error uploading file:', error);
-      alert('Failed to upload file. Please try again.');
+      toast.error(`Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setFileUploadProgress(0);
       setIsUploadingFile(false);
     }
   };
@@ -263,7 +327,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                         <Pencil className="w-4 h-4 text-gray-400 group-hover:text-blue-400" />
                       </button>
                       <button
-                        onClick={() => onDeleteSkinPack(skin.id)}
+                        onClick={() => handleDeleteClick(skin.id)}
                         className="p-2 hover:bg-red-500/20 rounded-lg transition-colors group"
                       >
                         <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-400" />
@@ -379,18 +443,23 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
               {/* Image Upload Section */}
               <div className="mb-6">
                 <label className="block text-sm text-gray-400 mb-2">Gallery Images</label>
-                
+
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   {uploadedImages.map((image, index) => (
-                    <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-slate-800">
+                    <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-slate-800 border border-slate-700">
                       <img src={image} alt={`Upload ${index + 1}`} className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => handleRemoveImage(index)}
-                        className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
+                        className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors shadow-lg"
                       >
                         <X className="w-4 h-4" />
                       </button>
+                      {uploadedImages[index] && (
+                        <div className="absolute bottom-2 left-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                          <CheckCircle2 className="w-4 h-4 text-white" />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -398,11 +467,12 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                 <button
                   type="button"
                   onClick={() => document.getElementById('image-upload')?.click()}
-                  className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
+                  disabled={isUploadingImages}
+                  className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ImageIcon className="w-8 h-8 text-gray-400 group-hover:text-orange-400 transition-colors" />
                   <span className="text-gray-400 group-hover:text-orange-400 transition-colors">
-                    Click to upload images
+                    {isUploadingImages ? 'Uploading images...' : 'Click to upload images'}
                   </span>
                   <span className="text-xs text-gray-500">Accepts .jpg, .png, .gif</span>
                 </button>
@@ -413,8 +483,22 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                   accept="image/*"
                   onChange={handleImageUpload}
                   className="hidden"
+                  disabled={isUploadingImages}
                 />
-                {isUploadingImages && <p className="text-sm text-gray-400 mt-2">Uploading...</p>}
+
+                {/* Image Upload Progress */}
+                {Object.keys(imageUploadProgress).length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {Object.entries(imageUploadProgress).map(([key, progress]) => (
+                      <UploadProgress
+                        key={key}
+                        fileName={key.split('-')[0]}
+                        progress={progress}
+                        status={progress === 100 ? 'complete' : 'uploading'}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Download URL Section */}
@@ -430,50 +514,68 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                 />
               </div>
 
-              {/* File Upload Section (Secondary Option) */}
-              <details className="mb-6">
-                <summary className="text-sm text-gray-400 cursor-pointer hover:text-orange-400 transition-colors">Or upload directly (max 50MB)</summary>
-                <div className="mt-4">
-                  {uploadedFile && (
-                    <div className="mb-4 p-4 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Package className="w-5 h-5 text-orange-400" />
-                        <div>
-                          <div className="text-sm">{uploadedFile}</div>
-                          <div className="text-xs text-gray-400">Uploaded successfully</div>
+              {/* File Upload Section */}
+              <div className="mb-6">
+                <label className="block text-sm text-gray-400 mb-2">Mod File Upload (Optional)</label>
+                <p className="text-xs text-gray-500 mb-3">Upload your mod file directly (max 50MB). For larger files, use the Download URL field instead.</p>
+
+                {uploadedFile && (
+                  <div className="mb-4 p-4 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Package className="w-5 h-5 text-orange-400" />
+                      <div>
+                        <div className="text-sm font-medium">{uploadedFile}</div>
+                        <div className="text-xs text-gray-400">
+                          {formatFileSize(100 * 1024 * 1024)} - Ready
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => { setUploadedFile(null); setUploadedFilePath(null); }}
-                        className="w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
                     </div>
-                  )}
+                    <button
+                      type="button"
+                      onClick={() => { setUploadedFile(null); setUploadedFilePath(null); }}
+                      className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5 text-red-400" />
+                    </button>
+                  </div>
+                )}
 
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('file-upload')?.click()}
-                    className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
-                  >
-                    <Upload className="w-8 h-8 text-gray-400 group-hover:text-orange-400 transition-colors" />
-                    <span className="text-gray-400 group-hover:text-orange-400 transition-colors">
-                      Click to upload skin pack file
-                    </span>
-                    <span className="text-xs text-gray-500">Accepts .zip files</span>
-                  </button>
-                  <input
-                    type="file"
-                    id="file-upload"
-                    accept="application/zip"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  {isUploadingFile && <p className="text-sm text-gray-400 mt-2">Uploading...</p>}
-                </div>
-              </details>
+                {!uploadedFile && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('file-upload')?.click()}
+                      disabled={isUploadingFile}
+                      className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Upload className="w-8 h-8 text-gray-400 group-hover:text-orange-400 transition-colors" />
+                      <span className="text-gray-400 group-hover:text-orange-400 transition-colors">
+                        {isUploadingFile ? 'Uploading file...' : 'Click to upload mod file'}
+                      </span>
+                      <span className="text-xs text-gray-500">Accepts .zip files up to 50MB</span>
+                    </button>
+                    <input
+                      type="file"
+                      id="file-upload"
+                      accept="application/zip"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      disabled={isUploadingFile}
+                    />
+                  </>
+                )}
+
+                {/* File Upload Progress */}
+                {isUploadingFile && (
+                  <div className="mt-4">
+                    <UploadProgress
+                      fileName="mod-file.zip"
+                      progress={fileUploadProgress}
+                      status={fileUploadProgress === 100 ? 'processing' : 'uploading'}
+                    />
+                  </div>
+                )}
+              </div>
 
               {/* Featured Checkbox */}
               <div className="mb-6 p-4 bg-gradient-to-br from-orange-500/10 to-orange-500/10 border border-orange-500/20 rounded-lg">
@@ -514,6 +616,22 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        title="Delete Skin Pack"
+        message="Are you sure you want to delete this skin pack? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        isDangerous={true}
+        isOpen={showDeleteConfirm}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setDeleteTargetId(null);
+        }}
+        isLoading={isDeleting}
+      />
     </>
   );
 }

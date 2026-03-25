@@ -5,10 +5,12 @@ import { ShopPage } from './components/ShopPage';
 import { SkinDetailPage } from './components/SkinDetailPage';
 import { DashboardPage } from './components/DashboardPage';
 import { AdminLogin } from './components/AdminLogin';
+import { CheckoutSuccess } from './components/CheckoutSuccess';
 import { games as defaultGames, skinPacks as defaultSkinPacks } from './data/mockData';
 import { SkinPack } from './types';
 import { useEffect } from 'react';
 import * as api from './utils/api';
+import { toast, Toaster } from 'sonner';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -132,12 +134,12 @@ export default function App() {
         ...newSkinPack,
         id: Date.now().toString()
       };
-      
+
       await api.createSkinPack(skinPackWithId);
       setSkinPacks([skinPackWithId, ...skinPacks]);
     } catch (error) {
       console.error('Error creating skin pack:', error);
-      alert('Failed to create skin pack. Please try again.');
+      toast.error('Failed to create skin pack. Please try again.');
     }
   };
 
@@ -147,26 +149,22 @@ export default function App() {
         ...updatedSkinPack,
         id
       };
-      
+
       await api.updateSkinPack(skinPackWithId);
       setSkinPacks(skinPacks.map(skin => skin.id === id ? skinPackWithId : skin));
     } catch (error) {
       console.error('Error updating skin pack:', error);
-      alert('Failed to update skin pack. Please try again.');
+      toast.error('Failed to update skin pack. Please try again.');
     }
   };
 
   const handleDeleteSkinPack = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this skin pack?')) {
-      return;
-    }
-    
     try {
       await api.deleteSkinPack(id);
       setSkinPacks(skinPacks.filter(skin => skin.id !== id));
     } catch (error) {
       console.error('Error deleting skin pack:', error);
-      alert('Failed to delete skin pack. Please try again.');
+      toast.error('Failed to delete skin pack. Please try again.');
     }
   };
 
@@ -184,25 +182,29 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      <Navigation 
-        currentPage={currentPage} 
-        onNavigate={handleNavigate} 
-        onLogoClick={handleLogoClick} 
+      <Navigation
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
+        onLogoClick={handleLogoClick}
         onAdminAccess={handleAdminAccess}
       />
-      
+
       {currentPage === 'home' && (
         <HomePage latestSkins={latestSkins} featuredSkins={featuredSkins} onNavigate={handleNavigate} />
       )}
-      
+
       {currentPage === 'shop' && (
         <ShopPage games={games} skinPacks={skinPacks} onNavigate={handleNavigate} />
       )}
-      
+
       {currentPage === 'skin' && selectedSkin && (
         <SkinDetailPage skin={selectedSkin} onNavigate={handleNavigate} />
       )}
-      
+
+      {currentPage === 'checkout/success' && (
+        <CheckoutSuccess skinPack={selectedSkin} onNavigate={handleNavigate} />
+      )}
+
       {currentPage === 'dashboard' && (
         <DashboardPage
           games={games}
@@ -245,11 +247,14 @@ export default function App() {
 
       {/* Admin Login Modal */}
       {showAdminLogin && (
-        <AdminLogin 
+        <AdminLogin
           onLoginSuccess={handleAdminLoginSuccess}
           onClose={() => setShowAdminLogin(false)}
         />
       )}
+
+      {/* Toast Notifications */}
+      <Toaster position="top-right" />
 
       {/* Footer */}
       <footer className="bg-slate-950 border-t border-slate-800 py-12">

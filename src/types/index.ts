@@ -20,4 +20,7 @@ export interface SkinPack {
   fileSize: string;
   featured?: boolean;
   downloadUrl?: string;
+  stripeProductId?: string;
+  stripePriceId?: string;
+  r2Key?: string;
 }
