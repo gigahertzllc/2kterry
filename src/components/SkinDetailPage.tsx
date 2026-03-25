@@ -127,7 +127,14 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
                   {skin.price !== 0 && <span className="text-gray-400">USD</span>}
                 </div>
 
-                <button className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-3 group mb-4">
+                <button
+                  onClick={() => {
+                    if ((skin as any).downloadUrl) {
+                      window.open((skin as any).downloadUrl, '_blank');
+                    }
+                  }}
+                  className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-3 group mb-4"
+                >
                   <ShoppingCart className="w-5 h-5" />
                   <span>{skin.price === 0 ? 'Download Free' : 'Add to Cart'}</span>
                 </button>

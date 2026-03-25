@@ -62,17 +62,18 @@ export default function App() {
     loadData();
   }, []);
 
-  // Check URL hash for direct admin access - on load and on hash changes
+  // Check URL path and hash for direct admin access - on load and on hash changes
   useEffect(() => {
-    const checkHash = () => {
+    const checkAdminAccess = () => {
       const hash = window.location.hash.replace('#', '');
-      if (hash === 'admin') {
+      const pathname = window.location.pathname;
+      if (hash === 'admin' || pathname === '/admin') {
         setShowAdminLogin(true);
       }
     };
-    checkHash();
-    window.addEventListener('hashchange', checkHash);
-    return () => window.removeEventListener('hashchange', checkHash);
+    checkAdminAccess();
+    window.addEventListener('hashchange', checkAdminAccess);
+    return () => window.removeEventListener('hashchange', checkAdminAccess);
   }, []);
 
   const handleNavigate = (page: string, skinId?: string) => {

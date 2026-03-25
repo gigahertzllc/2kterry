@@ -19,4 +19,5 @@ export interface SkinPack {
   dateAdded: string;
   fileSize: string;
   featured?: boolean;
+  downloadUrl?: string;
 }

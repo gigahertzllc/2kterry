@@ -22,6 +22,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     fileSizeValue: '',
     fileSizeUnit: 'MB',
     featured: false,
+    downloadUrl: '',
   });
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadedImagePaths, setUploadedImagePaths] = useState<string[]>([]);
@@ -45,6 +46,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
       fileSizeValue,
       fileSizeUnit,
       featured: skin.featured || false,
+      downloadUrl: (skin as any).downloadUrl || '',
     });
     setUploadedImages(skin.images);
     setUploadedImagePaths(skin.images);
@@ -54,7 +56,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
   const handleCloseModal = () => {
     setShowUploadModal(false);
     setEditingSkinPack(null);
-    setFormData({ name: '', description: '', price: '', gameId: '', fileSizeValue: '', fileSizeUnit: 'MB', featured: false });
+    setFormData({ name: '', description: '', price: '', gameId: '', fileSizeValue: '', fileSizeUnit: 'MB', featured: false, downloadUrl: '' });
     setUploadedImages([]);
     setUploadedImagePaths([]);
     setUploadedFile(null);
@@ -85,6 +87,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
       dateAdded: new Date().toISOString().split('T')[0],
       fileSize: `${formData.fileSizeValue} ${formData.fileSizeUnit}`,
       featured: formData.featured,
+      downloadUrl: formData.downloadUrl || undefined,
     };
 
     if (editingSkinPack) {
@@ -101,7 +104,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     setIsUploadingImages(true);
 
     const files = Array.from(e.target.files);
-    
+
     try {
       const blobUrls = files.map(file => URL.createObjectURL(file));
       const uploadPromises = files.map(async (file) => {
@@ -109,13 +112,14 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
           return await api.uploadImage(file);
         } catch (error) {
           console.error(`Error uploading ${file.name}:`, error);
-          throw error;
+          // If upload fails, use blob URL as fallback
+          return { path: URL.createObjectURL(file) };
         }
       });
-      
+
       const uploadResults = await Promise.all(uploadPromises);
       const paths = uploadResults.map(result => result.path);
-      
+
       setUploadedImages(prev => [...prev, ...blobUrls]);
       setUploadedImagePaths(prev => [...prev, ...paths]);
       setIsUploadingImages(false);
@@ -413,49 +417,63 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                 {isUploadingImages && <p className="text-sm text-gray-400 mt-2">Uploading...</p>}
               </div>
 
-              {/* File Upload Section */}
+              {/* Download URL Section */}
               <div className="mb-6">
-                <label className="block text-sm text-gray-400 mb-2">Skin Pack File</label>
-                
-                {uploadedFile && (
-                  <div className="mb-4 p-4 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Package className="w-5 h-5 text-orange-400" />
-                      <div>
-                        <div className="text-sm">{uploadedFile}</div>
-                        <div className="text-xs text-gray-400">Uploaded successfully</div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => { setUploadedFile(null); setUploadedFilePath(null); }}
-                      className="w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-                
-                <button
-                  type="button"
-                  onClick={() => document.getElementById('file-upload')?.click()}
-                  className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
-                >
-                  <Upload className="w-8 h-8 text-gray-400 group-hover:text-orange-400 transition-colors" />
-                  <span className="text-gray-400 group-hover:text-orange-400 transition-colors">
-                    Click to upload skin pack file
-                  </span>
-                  <span className="text-xs text-gray-500">Accepts .zip files</span>
-                </button>
+                <label className="block text-sm text-gray-400 mb-2">Download URL (Optional)</label>
+                <p className="text-xs text-gray-500 mb-2">Provide an external download link (Google Drive, Mega, etc.)</p>
                 <input
-                  type="file"
-                  id="file-upload"
-                  accept="application/zip"
-                  onChange={handleFileUpload}
-                  className="hidden"
+                  type="text"
+                  value={formData.downloadUrl}
+                  onChange={(e) => setFormData({ ...formData, downloadUrl: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors mb-6"
+                  placeholder="https://drive.google.com/file/d/..."
                 />
-                {isUploadingFile && <p className="text-sm text-gray-400 mt-2">Uploading...</p>}
               </div>
+
+              {/* File Upload Section (Secondary Option) */}
+              <details className="mb-6">
+                <summary className="text-sm text-gray-400 cursor-pointer hover:text-orange-400 transition-colors">Or upload directly (max 50MB)</summary>
+                <div className="mt-4">
+                  {uploadedFile && (
+                    <div className="mb-4 p-4 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Package className="w-5 h-5 text-orange-400" />
+                        <div>
+                          <div className="text-sm">{uploadedFile}</div>
+                          <div className="text-xs text-gray-400">Uploaded successfully</div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { setUploadedFile(null); setUploadedFilePath(null); }}
+                        className="w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('file-upload')?.click()}
+                    className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
+                  >
+                    <Upload className="w-8 h-8 text-gray-400 group-hover:text-orange-400 transition-colors" />
+                    <span className="text-gray-400 group-hover:text-orange-400 transition-colors">
+                      Click to upload skin pack file
+                    </span>
+                    <span className="text-xs text-gray-500">Accepts .zip files</span>
+                  </button>
+                  <input
+                    type="file"
+                    id="file-upload"
+                    accept="application/zip"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  {isUploadingFile && <p className="text-sm text-gray-400 mt-2">Uploading...</p>}
+                </div>
+              </details>
 
               {/* Featured Checkbox */}
               <div className="mb-6 p-4 bg-gradient-to-br from-orange-500/10 to-orange-500/10 border border-orange-500/20 rounded-lg">
