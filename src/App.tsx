@@ -221,9 +221,9 @@ export default function App() {
               for the NBA 2K community. Your donation helps fund development, server costs, and enables us
               to bring you more amazing mods.
             </p>
-            <button className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all">
+            <a href="https://buymeacoffee.com/2kterrysmods" target="_blank" rel="noopener noreferrer" className="inline-block px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all text-white font-semibold">
               Donate Now
-            </button>
+            </a>
           </div>
         </div>
       )}
