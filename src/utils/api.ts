@@ -18,21 +18,15 @@ export async function initializeDatabase() {
       const defaultGames: Game[] = [
         {
           id: '1',
-          name: 'NBA 2K25',
-          slug: 'nba2k25',
-          image: 'https://images.unsplash.com/photo-1653191584476-9b7b47f9a8c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYmElMjBiYXNrZXRiYWxsJTIwcGxheWVyfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+          name: 'NBA 2K26',
+          slug: 'nba2k26',
+          image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800'
         },
         {
           id: '2',
-          name: 'Madden 26',
-          slug: 'madden26',
-          image: 'https://images.unsplash.com/photo-1763479177586-efdf53f9001b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMGdhbWUlMjBhY3Rpb248ZW58MXx8fHwxNzY1MjQ0NDIyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
-        },
-        {
-          id: '3',
-          name: 'FC 25',
-          slug: 'fc25',
-          image: 'https://images.unsplash.com/photo-1759701547036-bf7d7b05cc52?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3BvcnRzJTIwZ2FtaW5nJTIwc2V0dXB8ZW58MXx8fHwxNzY1MTYyMzY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+          name: 'NBA 2K25',
+          slug: 'nba2k25',
+          image: 'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800'
         }
       ];
 

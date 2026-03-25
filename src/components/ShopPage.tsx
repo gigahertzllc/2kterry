@@ -35,9 +35,9 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Skin Shop
+                Mods
               </h1>
-              <p className="text-gray-400">Browse and download premium mod skins</p>
+              <p className="text-gray-400">Browse and download premium 2K mods</p>
             </div>
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-400" />

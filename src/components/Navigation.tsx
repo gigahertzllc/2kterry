@@ -1,4 +1,4 @@
-import { ShoppingBag, LayoutDashboard, Home } from 'lucide-react';
+import { ShoppingBag, LayoutDashboard, Home, Heart, Info } from 'lucide-react';
 import { useState, useRef } from 'react';
 
 interface NavigationProps {
@@ -109,7 +109,31 @@ export function Navigation({ currentPage, onNavigate, onLogoClick, onAdminAccess
               }`}
             >
               <ShoppingBag className="w-4 h-4" />
-              <span>Shop</span>
+              <span>Mods</span>
+            </button>
+
+            <button
+              onClick={() => onNavigate('about')}
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
+                currentPage === 'about'
+                  ? 'bg-purple-500 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <Info className="w-4 h-4" />
+              <span>About</span>
+            </button>
+
+            <button
+              onClick={() => onNavigate('donation')}
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
+                currentPage === 'donation'
+                  ? 'bg-purple-500 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <Heart className="w-4 h-4" />
+              <span>Donation</span>
             </button>
           </div>
         </div>

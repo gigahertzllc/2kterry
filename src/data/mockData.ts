@@ -3,131 +3,128 @@ import { Game, SkinPack } from '../types';
 export const games: Game[] = [
   {
     id: '1',
-    name: 'NBA 2K25',
-    slug: 'nba2k25',
-    image: 'https://images.unsplash.com/photo-1653191584476-9b7b47f9a8c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYmElMjBiYXNrZXRiYWxsJTIwcGxheWVyfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+    name: 'NBA 2K26',
+    slug: 'nba2k26',
+    image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800'
   },
   {
     id: '2',
-    name: 'Madden 26',
-    slug: 'madden26',
-    image: 'https://images.unsplash.com/photo-1763479177586-efdf53f9001b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMGdhbWUlMjBhY3Rpb258ZW58MXx8fHwxNzY1MjQ0NDIyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
-  },
-  {
-    id: '3',
-    name: 'FC 25',
-    slug: 'fc25',
-    image: 'https://images.unsplash.com/photo-1759701547036-bf7d7b05cc52?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3BvcnRzJTIwZ2FtaW5nJTIwc2V0dXB8ZW58MXx8fHwxNzY1MTYyMzY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+    name: 'NBA 2K25',
+    slug: 'nba2k25',
+    image: 'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800'
   }
 ];
 
 export const skinPacks: SkinPack[] = [
   {
     id: '1',
-    name: 'Lakers Championship Pack',
-    description: 'Complete Lakers roster with championship uniforms and retro throwbacks',
-    price: 14.99,
+    name: '2K26 Cyberface Pack Vol. 1',
+    description: '18 players and 2 coaches - HD cyberfaces with realistic likeness for NBA 2K26',
+    price: 0,
     gameId: '1',
-    gameName: 'NBA 2K25',
+    gameName: 'NBA 2K26',
     images: [
-      'https://images.unsplash.com/photo-1653191584476-9b7b47f9a8c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYmElMjBiYXNrZXRiYWxsJTIwcGxheWVyfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1664092815283-19c6196f5319?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBuZW9uJTIwbGlnaHRzfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1653191584476-9b7b47f9a8c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYmElMjBiYXNrZXRiYWxsJTIwcGxheWVyfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1653191584476-9b7b47f9a8c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYmElMjBiYXNrZXRiYWxsJTIwcGxheWVyfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    downloads: 1243,
-    rating: 4.8,
-    dateAdded: '2025-12-08',
-    fileSize: '245 MB'
+    thumbnail: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+    downloads: 3250,
+    rating: 4.9,
+    dateAdded: '2026-03-20',
+    fileSize: '156 MB',
+    featured: true
   },
   {
     id: '2',
-    name: 'Heat Vice Edition',
-    description: 'Miami Heat Vice-themed uniforms and court designs with neon aesthetics',
-    price: 12.99,
-    gameId: '1',
+    name: 'Bulls Complete Cyberface Pack',
+    description: 'Full Chicago Bulls roster cyberfaces - FREE giveaway pack with all current players',
+    price: 0,
+    gameId: '2',
     gameName: 'NBA 2K25',
     images: [
-      'https://images.unsplash.com/photo-1664092815283-19c6196f5319?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBuZW9uJTIwbGlnaHRzfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1653191584476-9b7b47f9a8c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYmElMjBiYXNrZXRiYWxsJTIwcGxheWVyfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1664092815283-19c6196f5319?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBuZW9uJTIwbGlnaHRzfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1664092815283-19c6196f5319?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBuZW9uJTIwbGlnaHRzfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    downloads: 2156,
-    rating: 4.9,
-    dateAdded: '2025-12-07',
-    fileSize: '198 MB'
+    thumbnail: 'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+    downloads: 5120,
+    rating: 4.8,
+    dateAdded: '2026-03-15',
+    fileSize: '245 MB',
+    featured: true
   },
   {
     id: '3',
-    name: 'Chiefs Super Bowl Pack',
-    description: 'Kansas City Chiefs complete uniform collection with Super Bowl gear',
-    price: 16.99,
-    gameId: '2',
-    gameName: 'Madden 26',
+    name: 'Court Fog Effect Pack',
+    description: 'Atmospheric fog and lighting effects for your custom courts - adds cinematic feel to gameplay',
+    price: 0,
+    gameId: '1',
+    gameName: 'NBA 2K26',
     images: [
-      'https://images.unsplash.com/photo-1763479177586-efdf53f9001b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMGdhbWUlMjBhY3Rpb258ZW58MXx8fHwxNzY1MjQ0NDIyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1664092815283-19c6196f5319?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBuZW9uJTIwbGlnaHRzfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1763479177586-efdf53f9001b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMGdhbWUlMjBhY3Rpb258ZW58MXx8fHwxNzY1MjQ0NDIyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1763479177586-efdf53f9001b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMGdhbWUlMjBhY3Rpb258ZW58MXx8fHwxNzY1MjQ0NDIyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    downloads: 987,
+    thumbnail: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+    downloads: 2890,
     rating: 4.7,
-    dateAdded: '2025-12-06',
-    fileSize: '312 MB'
+    dateAdded: '2026-03-10',
+    fileSize: '89 MB'
   },
   {
     id: '4',
-    name: '49ers Retro Collection',
-    description: 'San Francisco 49ers throwback jerseys from iconic championship seasons',
-    price: 13.99,
+    name: 'Player Silhouette Poster Pack',
+    description: 'High-res player silhouette artwork for loading screens and menus - FREE download',
+    price: 0,
     gameId: '2',
-    gameName: 'Madden 26',
+    gameName: 'NBA 2K25',
     images: [
-      'https://images.unsplash.com/photo-1763479177586-efdf53f9001b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMGdhbWUlMjBhY3Rpb258ZW58MXx8fHwxNzY1MjQ0NDIyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1664092815283-19c6196f5319?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBuZW9uJTIwbGlnaHRzfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1763479177586-efdf53f9001b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMGdhbWUlMjBhY3Rpb258ZW58MXx8fHwxNzY1MjQ0NDIyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1763479177586-efdf53f9001b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMGdhbWUlMjBhY3Rpb258ZW58MXx8fHwxNzY1MjQ0NDIyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    downloads: 1432,
+    thumbnail: 'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+    downloads: 4100,
     rating: 4.6,
-    dateAdded: '2025-12-05',
-    fileSize: '276 MB'
+    dateAdded: '2026-03-05',
+    fileSize: '52 MB'
   },
   {
     id: '5',
-    name: 'Premier League Ultimate',
-    description: 'All 20 Premier League teams with authentic kits and stadium designs',
-    price: 19.99,
-    gameId: '3',
-    gameName: 'FC 25',
+    name: 'All-Star Weekend Jersey Pack',
+    description: 'Complete All-Star Weekend uniforms with warm-up gear and accessories for NBA 2K26',
+    price: 9.99,
+    gameId: '1',
+    gameName: 'NBA 2K26',
     images: [
-      'https://images.unsplash.com/photo-1759701547036-bf7d7b05cc52?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3BvcnRzJTIwZ2FtaW5nJTIwc2V0dXB8ZW58MXx8fHwxNzY1MTYyMzY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1664092815283-19c6196f5319?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBuZW9uJTIwbGlnaHRzfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1759701547036-bf7d7b05cc52?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3BvcnRzJTIwZ2FtaW5nJTIwc2V0dXB8ZW58MXx8fHwxNzY1MTYyMzY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1759701547036-bf7d7b05cc52?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3BvcnRzJTIwZ2FtaW5nJTIwc2V0dXB8ZW58MXx8fHwxNzY1MTYyMzY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    downloads: 3421,
+    thumbnail: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+    downloads: 1850,
     rating: 4.9,
-    dateAdded: '2025-12-09',
-    fileSize: '425 MB'
+    dateAdded: '2026-02-28',
+    fileSize: '198 MB',
+    featured: true
   },
   {
     id: '6',
-    name: 'Classic Legends Pack',
-    description: 'Retro jerseys from football legends including Pele, Maradona era designs',
-    price: 17.99,
-    gameId: '3',
-    gameName: 'FC 25',
+    name: 'Classic Courts Collection',
+    description: 'Retro-styled courts from iconic NBA arenas - includes 10 legendary courts',
+    price: 7.99,
+    gameId: '2',
+    gameName: 'NBA 2K25',
     images: [
-      'https://images.unsplash.com/photo-1759701547036-bf7d7b05cc52?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3BvcnRzJTIwZ2FtaW5nJTIwc2V0dXB8ZW58MXx8fHwxNzY1MTYyMzY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1664092815283-19c6196f5319?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBuZW9uJTIwbGlnaHRzfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-      'https://images.unsplash.com/photo-1759701547036-bf7d7b05cc52?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3BvcnRzJTIwZ2FtaW5nJTIwc2V0dXB8ZW58MXx8fHwxNzY1MTYyMzY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1759701547036-bf7d7b05cc52?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlc3BvcnRzJTIwZ2FtaW5nJTIwc2V0dXB8ZW58MXx8fHwxNzY1MTYyMzY3fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-    downloads: 2876,
+    thumbnail: 'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+    downloads: 2340,
     rating: 4.8,
-    dateAdded: '2025-12-04',
-    fileSize: '364 MB'
+    dateAdded: '2026-02-20',
+    fileSize: '310 MB'
   }
 ];

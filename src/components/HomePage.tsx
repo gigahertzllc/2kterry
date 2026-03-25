@@ -193,16 +193,16 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
 
             <div className="relative z-10 text-center px-6 max-w-5xl">
               <h1 className="mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                Premium Game Mod Skins
+                Welcome to 2K Terry's Mods
               </h1>
               <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                Transform your gaming experience with exclusive, high-quality skin packs for NBA 2K, Madden, FC, and more
+                Enhance Your 2K Experience with premium cyberfaces, jerseys, courts, and roster mods
               </p>
               <button
                 onClick={() => onNavigate('shop')}
                 className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-2 mx-auto group"
               >
-                <span>Browse Collection</span>
+                <span>Browse Mods</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -216,8 +216,8 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="flex items-center justify-between mb-12">
           <div>
-            <h2 className="mb-2">Latest Additions</h2>
-            <p className="text-gray-400">Fresh skin packs just dropped</p>
+            <h2 className="mb-2">Latest Mods</h2>
+            <p className="text-gray-400">New mods just dropped</p>
           </div>
           <button
             onClick={() => onNavigate('shop')}
@@ -285,8 +285,8 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Star className="w-8 h-8" />
               </div>
-              <h4 className="mb-2">Premium Quality</h4>
-              <p className="text-gray-400">Professionally designed and tested mods</p>
+              <h4 className="mb-2">HD Cyberfaces</h4>
+              <p className="text-gray-400">Realistic player faces crafted with attention to detail</p>
             </div>
 
             <div className="text-center p-8 rounded-2xl bg-slate-900/50 backdrop-blur border border-purple-500/20">

@@ -39,7 +39,7 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
           className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Back to Shop</span>
+          <span>Back to Mods</span>
         </button>
       </div>
 
@@ -122,14 +122,14 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
 
                 <div className="flex items-baseline gap-2 mb-6">
                   <span className="text-4xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    ${skin.price}
+                    {skin.price === 0 ? 'FREE' : `$${skin.price}`}
                   </span>
-                  <span className="text-gray-400">USD</span>
+                  {skin.price !== 0 && <span className="text-gray-400">USD</span>}
                 </div>
 
                 <button className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center justify-center gap-3 group mb-4">
                   <ShoppingCart className="w-5 h-5" />
-                  <span>Add to Cart</span>
+                  <span>{skin.price === 0 ? 'Download Free' : 'Add to Cart'}</span>
                 </button>
 
                 <button className="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-lg transition-all flex items-center justify-center gap-3">
