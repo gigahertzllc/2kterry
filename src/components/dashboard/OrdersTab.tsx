@@ -110,7 +110,7 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-3"
+          className="px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center gap-3"
         >
           <Plus className="w-5 h-5" />
           <span>Create Order</span>
@@ -149,9 +149,9 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
           <div className="text-3xl text-yellow-400">{pendingOrders}</div>
         </div>
 
-        <div className="p-6 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl">
+        <div className="p-6 bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 rounded-2xl">
           <div className="flex items-center gap-3 mb-2">
-            <DollarSign className="w-5 h-5 text-purple-400" />
+            <DollarSign className="w-5 h-5 text-orange-400" />
             <span className="text-sm text-gray-400">Total Revenue</span>
           </div>
           <div className="text-3xl">${totalRevenue.toFixed(2)}</div>
@@ -197,8 +197,8 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <Package className="w-4 h-4 text-purple-400" />
-                        <span className="text-purple-400">{order.id}</span>
+                        <Package className="w-4 h-4 text-orange-400" />
+                        <span className="text-orange-400">{order.id}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -234,10 +234,10 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
       {/* Create Order Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
-          <div className="bg-slate-900 rounded-2xl border border-purple-500/20 max-w-md w-full">
-            <div className="relative bg-gradient-to-br from-purple-500/20 to-pink-500/20 p-8 border-b border-purple-500/20">
+          <div className="bg-slate-900 rounded-2xl border border-orange-500/20 max-w-md w-full">
+            <div className="relative bg-gradient-to-br from-orange-500/20 to-orange-500/20 p-8 border-b border-orange-500/20">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                   <Plus className="w-6 h-6" />
                 </div>
                 <h2>Create New Order</h2>
@@ -259,7 +259,7 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
                   <select
                     value={formData.customerId}
                     onChange={(e) => setFormData({ ...formData, customerId: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     required
                   >
                     <option value="">Select a customer</option>
@@ -279,7 +279,7 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
                   <select
                     value={formData.skinPackId}
                     onChange={(e) => setFormData({ ...formData, skinPackId: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     required
                   >
                     <option value="">Select a skin pack</option>
@@ -293,9 +293,9 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
               </div>
 
               {formData.skinPackId && (
-                <div className="mb-6 p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                <div className="mb-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg">
                   <div className="text-sm text-gray-400 mb-1">Order Total</div>
-                  <div className="text-2xl text-purple-400">
+                  <div className="text-2xl text-orange-400">
                     ${skinPacks.find(sp => sp.id === formData.skinPackId)?.price.toFixed(2)}
                   </div>
                 </div>
@@ -304,7 +304,7 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
               <div className="flex gap-4">
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+                  className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all"
                 >
                   Create Order
                 </button>

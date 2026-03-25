@@ -187,7 +187,7 @@ export default function App() {
       {currentPage === 'about' && (
         <div className="min-h-screen pt-20 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
           <div className="max-w-7xl mx-auto px-6 py-20">
-            <h1 className="mb-6 text-4xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">About 2K Terry's Mods</h1>
+            <h1 className="mb-6 text-4xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">About 2K Terry's Mods</h1>
             <p className="text-gray-300 text-lg max-w-3xl">
               2K Terry's Mods is a community-driven platform dedicated to providing premium NBA 2K mods.
               From HD cyberfaces to custom courts and roster updates, we craft the highest quality modifications
@@ -201,13 +201,13 @@ export default function App() {
       {currentPage === 'donation' && (
         <div className="min-h-screen pt-20 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
           <div className="max-w-7xl mx-auto px-6 py-20">
-            <h1 className="mb-6 text-4xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Support 2K Terry's Mods</h1>
+            <h1 className="mb-6 text-4xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">Support 2K Terry's Mods</h1>
             <p className="text-gray-300 text-lg max-w-3xl mb-8">
               Love our mods? Consider supporting the project to help us continue creating premium content
               for the NBA 2K community. Your donation helps fund development, server costs, and enables us
               to bring you more amazing mods.
             </p>
-            <button className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all">
+            <button className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all">
               Donate Now
             </button>
           </div>
@@ -238,9 +238,9 @@ export default function App() {
               <ul className="space-y-2 text-sm text-gray-400">
                 {games.map((game) => (
                   <li key={game.id}>
-                    <button 
+                    <button
                       onClick={() => handleNavigate('shop')}
-                      className="hover:text-purple-400 transition-colors"
+                      className="hover:text-orange-400 transition-colors"
                     >
                       {game.name}
                     </button>
@@ -248,29 +248,29 @@ export default function App() {
                 ))}
               </ul>
             </div>
-            
+
             <div>
               <h4 className="mb-4 text-sm">Support</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Installation Guide</a></li>
-                <li><a href="#" className="hover:text-purple-400 transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Discord</a></li>
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Facebook</a></li>
+                <li><a href="#" className="hover:text-orange-400 transition-colors">Installation Guide</a></li>
+                <li><a href="#" className="hover:text-orange-400 transition-colors">FAQ</a></li>
+                <li><a href="#" className="hover:text-orange-400 transition-colors">Discord</a></li>
+                <li><a href="#" className="hover:text-orange-400 transition-colors">Facebook</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="mb-4 text-sm">Legal</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-purple-400 transition-colors">Refund Policy</a></li>
+                <li><a href="#" className="hover:text-orange-400 transition-colors">Terms of Service</a></li>
+                <li><a href="#" className="hover:text-orange-400 transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-orange-400 transition-colors">Refund Policy</a></li>
               </ul>
             </div>
           </div>
-          
+
           <div className="pt-8 border-t border-slate-800 text-center text-sm text-gray-400">
-            <p>&copy; 2026 2KTerrysMods.com. All rights reserved.</p>
+            <p>© Copyright 2026 All Rights Reserved.</p>
           </div>
         </div>
       </footer>

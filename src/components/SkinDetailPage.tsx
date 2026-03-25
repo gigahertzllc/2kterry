@@ -87,7 +87,7 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
                   onClick={() => setCurrentImageIndex(index)}
                   className={`aspect-video rounded-lg overflow-hidden border-2 transition-all ${
                     currentImageIndex === index
-                      ? 'border-purple-500 scale-105'
+                      ? 'border-orange-500 scale-105'
                       : 'border-slate-700 hover:border-slate-600'
                   }`}
                 >
@@ -105,7 +105,7 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
               <div>
-                <div className="text-sm text-purple-400 mb-2">{skin.gameName}</div>
+                <div className="text-sm text-orange-400 mb-2">{skin.gameName}</div>
                 <h2 className="mb-4">{skin.name}</h2>
                 <p className="text-gray-400 mb-6">{skin.description}</p>
 
@@ -121,13 +121,13 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
                 </div>
 
                 <div className="flex items-baseline gap-2 mb-6">
-                  <span className="text-4xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  <span className="text-4xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">
                     {skin.price === 0 ? 'FREE' : `$${skin.price}`}
                   </span>
                   {skin.price !== 0 && <span className="text-gray-400">USD</span>}
                 </div>
 
-                <button className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center justify-center gap-3 group mb-4">
+                <button className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-3 group mb-4">
                   <ShoppingCart className="w-5 h-5" />
                   <span>{skin.price === 0 ? 'Download Free' : 'Add to Cart'}</span>
                 </button>

@@ -47,12 +47,12 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
                   index === currentSlide ? 'opacity-100' : 'opacity-0'
                 }`}
               >
-                <div 
+                <div
                   className="absolute inset-0 bg-cover bg-center"
                   style={{ backgroundImage: `url(${skin.images[0] || skin.thumbnail})` }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/70 to-slate-950"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-slate-950/80"></div>
+                  <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/95 via-cyan-900/80 to-cyan-950"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-950/85 via-transparent to-cyan-950/85"></div>
                 </div>
               </div>
             ))}
@@ -68,17 +68,17 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
                       index === currentSlide ? 'opacity-100 translate-x-0' : 'opacity-0 absolute -translate-x-8 pointer-events-none'
                     }`}
                   >
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full mb-6">
-                      <Sparkles className="w-4 h-4 text-purple-400" />
-                      <span className="text-sm text-purple-300">Featured Skin Pack</span>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-orange-500/20 border border-orange-500/30 rounded-full mb-6">
+                      <Sparkles className="w-4 h-4 text-orange-400" />
+                      <span className="text-sm text-orange-300">Featured Skin Pack</span>
                     </div>
                     
-                    <h1 className="mb-4 text-5xl lg:text-6xl bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent leading-tight">
+                    <h1 className="mb-4 text-5xl lg:text-6xl bg-gradient-to-r from-white via-orange-200 to-cyan-200 bg-clip-text text-transparent leading-tight">
                       {skin.name}
                     </h1>
                     
                     <div className="flex items-center gap-3 mb-6">
-                      <span className="px-4 py-2 bg-slate-900/80 backdrop-blur border border-purple-500/20 rounded-lg text-purple-400">
+                      <span className="px-4 py-2 bg-slate-900/80 backdrop-blur border border-orange-500/20 rounded-lg text-orange-400">
                         {skin.gameName}
                       </span>
                       <span className="px-4 py-2 bg-slate-900/80 backdrop-blur border border-slate-700/50 rounded-lg text-gray-400">
@@ -93,7 +93,7 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
                     {/* Stats */}
                     <div className="flex items-center gap-6 mb-8 text-sm">
                       <div className="flex items-center gap-2">
-                        <Download className="w-5 h-5 text-purple-400" />
+                        <Download className="w-5 h-5 text-orange-400" />
                         <span className="text-gray-400">{skin.downloads.toLocaleString()} downloads</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -110,15 +110,15 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => onNavigate('skin', skin.id)}
-                        className="group px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-3 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40"
+                        className="group px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all flex items-center gap-3 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40"
                       >
                         <span className="text-lg">Get Now</span>
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </button>
-                      
-                      <div className="flex items-center gap-3 px-6 py-4 bg-slate-900/90 backdrop-blur border border-purple-500/20 rounded-xl">
+
+                      <div className="flex items-center gap-3 px-6 py-4 bg-slate-900/90 backdrop-blur border border-orange-500/20 rounded-xl">
                         <span className="text-sm text-gray-400">Only</span>
-                        <span className="text-3xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        <span className="text-3xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">
                           ${skin.price}
                         </span>
                       </div>
@@ -135,11 +135,11 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
                     }`}
                   >
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl blur-3xl opacity-20"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-400 rounded-3xl blur-3xl opacity-20"></div>
                       <img
                         src={skin.images[0] || skin.thumbnail}
                         alt={skin.name}
-                        className="relative rounded-2xl border border-purple-500/20 shadow-2xl w-full"
+                        className="relative rounded-2xl border border-orange-500/20 shadow-2xl w-full"
                       />
                     </div>
                   </div>
@@ -152,26 +152,26 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
               <>
                 <button
                   onClick={prevSlide}
-                  className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-slate-900/80 hover:bg-purple-500/20 backdrop-blur border border-purple-500/20 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                  className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-slate-900/80 hover:bg-orange-500/20 backdrop-blur border border-orange-500/20 rounded-full flex items-center justify-center transition-all hover:scale-110"
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </button>
                 <button
                   onClick={nextSlide}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-slate-900/80 hover:bg-purple-500/20 backdrop-blur border border-purple-500/20 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                  className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-slate-900/80 hover:bg-orange-500/20 backdrop-blur border border-orange-500/20 rounded-full flex items-center justify-center transition-all hover:scale-110"
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
 
                 {/* Slide Indicators */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-slate-900/80 backdrop-blur px-4 py-3 rounded-full border border-purple-500/20">
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-slate-900/80 backdrop-blur px-4 py-3 rounded-full border border-orange-500/20">
                   {heroSlides.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentSlide(index)}
                       className={`h-2 rounded-full transition-all ${
                         index === currentSlide 
-                          ? 'w-8 bg-gradient-to-r from-purple-500 to-pink-500' 
+                          ? 'w-8 bg-gradient-to-r from-orange-500 to-orange-400' 
                           : 'w-2 bg-slate-600 hover:bg-slate-500'
                       }`}
                     />
@@ -182,25 +182,37 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
           </>
         ) : (
           <>
-            <div 
-              className="absolute inset-0 bg-cover bg-center"
+            <div
+              className="absolute inset-0 bg-gradient-to-br from-cyan-950 via-cyan-900 to-cyan-800"
               style={{
-                backgroundImage: 'url(https://images.unsplash.com/photo-1664092815283-19c6196f5319?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnYW1pbmclMjBuZW9uJTIwbGlnaHRzfGVufDF8fHx8MTc2NTI0NDQyMXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral)'
+                backgroundImage: `radial-gradient(circle at 25% 25%, rgba(34, 197, 235, 0.1) 0%, transparent 50%),
+                                  radial-gradient(circle at 75% 75%, rgba(249, 115, 22, 0.08) 0%, transparent 50%)`
               }}
             >
-              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/60 to-slate-950"></div>
+              <svg className="absolute inset-0 w-full h-full opacity-10" preserveAspectRatio="none">
+                <defs>
+                  <pattern id="court-lines" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                    <line x1="0" y1="50" x2="100" y2="50" stroke="white" strokeWidth="1" />
+                    <circle cx="50" cy="50" r="30" fill="none" stroke="white" strokeWidth="1" />
+                    <rect x="0" y="20" width="100" height="60" fill="none" stroke="white" strokeWidth="1" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#court-lines)" />
+              </svg>
+              <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/60 via-cyan-900/40 to-cyan-950/80"></div>
+              <div className="absolute inset-0 backdrop-blur-sm"></div>
             </div>
 
-            <div className="relative z-10 text-center px-6 max-w-5xl">
-              <h1 className="mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                Welcome to 2K Terry's Mods
+            <div className="relative z-10 text-left px-6 max-w-5xl">
+              <h1 className="mb-6 text-6xl lg:text-7xl font-bold text-white leading-tight">
+                WELCOME TO<br />2K TERRY'S MODS
               </h1>
-              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                Enhance Your 2K Experience with premium cyberfaces, jerseys, courts, and roster mods
+              <p className="text-2xl text-gray-200 mb-8 max-w-2xl">
+                Enhance Your 2K Experience
               </p>
               <button
                 onClick={() => onNavigate('shop')}
-                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-2 mx-auto group"
+                className="px-8 py-4 bg-orange-500 hover:bg-orange-600 rounded-lg transition-all flex items-center gap-2 group text-white font-semibold"
               >
                 <span>Browse Mods</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -245,7 +257,7 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
               </div>
 
               <div className="absolute bottom-0 left-0 right-0 p-6">
-                <div className="text-xs text-purple-400 mb-2">{skin.gameName}</div>
+                <div className="text-xs text-orange-400 mb-2">{skin.gameName}</div>
                 <h3 className="mb-3 text-left">{skin.name}</h3>
                 
                 <div className="flex items-center justify-between">
@@ -259,7 +271,7 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
                       <span>{skin.rating}</span>
                     </div>
                   </div>
-                  <div className="text-xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  <div className="text-xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">
                     ${skin.price}
                   </div>
                 </div>
@@ -270,27 +282,27 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
       </div>
 
       {/* Features Section */}
-      <div className="bg-gradient-to-b from-purple-500/10 to-transparent py-20">
+      <div className="bg-gradient-to-b from-orange-500/10 to-transparent py-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-8 rounded-2xl bg-slate-900/50 backdrop-blur border border-purple-500/20">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="text-center p-8 rounded-2xl bg-slate-900/50 backdrop-blur border border-orange-500/20">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Download className="w-8 h-8" />
               </div>
               <h4 className="mb-2">Instant Download</h4>
               <p className="text-gray-400">Get your skin packs immediately after purchase</p>
             </div>
 
-            <div className="text-center p-8 rounded-2xl bg-slate-900/50 backdrop-blur border border-purple-500/20">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="text-center p-8 rounded-2xl bg-slate-900/50 backdrop-blur border border-orange-500/20">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Star className="w-8 h-8" />
               </div>
               <h4 className="mb-2">HD Cyberfaces</h4>
               <p className="text-gray-400">Realistic player faces crafted with attention to detail</p>
             </div>
 
-            <div className="text-center p-8 rounded-2xl bg-slate-900/50 backdrop-blur border border-purple-500/20">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="text-center p-8 rounded-2xl bg-slate-900/50 backdrop-blur border border-orange-500/20">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <ArrowRight className="w-8 h-8" />
               </div>
               <h4 className="mb-2">Easy Installation</h4>

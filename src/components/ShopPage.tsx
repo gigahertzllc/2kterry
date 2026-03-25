@@ -30,18 +30,18 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
   return (
     <div className="min-h-screen pt-20 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       {/* Modern Compact Header */}
-      <div className="border-b border-purple-500/10 bg-gradient-to-b from-purple-500/5 to-transparent">
+      <div className="border-b border-orange-500/10 bg-gradient-to-b from-orange-500/5 to-transparent">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <h1 className="mb-2 bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">
                 Mods
               </h1>
               <p className="text-gray-400">Browse and download premium 2K mods</p>
             </div>
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-400" />
-              <span className="text-sm text-purple-400">{filteredSkins.length} available</span>
+              <Sparkles className="w-5 h-5 text-orange-400" />
+              <span className="text-sm text-orange-400">{filteredSkins.length} available</span>
             </div>
           </div>
 
@@ -51,7 +51,7 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
               onClick={() => setSelectedGame('all')}
               className={`px-5 py-2.5 rounded-full transition-all ${
                 selectedGame === 'all'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25'
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25'
                   : 'bg-slate-800/50 hover:bg-slate-800 text-gray-400 hover:text-white border border-slate-700'
               }`}
             >
@@ -64,7 +64,7 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
                 onClick={() => setSelectedGame(game.id)}
                 className={`px-5 py-2.5 rounded-full transition-all ${
                   selectedGame === game.id
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25'
+                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25'
                     : 'bg-slate-800/50 hover:bg-slate-800 text-gray-400 hover:text-white border border-slate-700'
                 }`}
               >
@@ -88,7 +88,7 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
                 onClick={() => setSortBy('newest')}
                 className={`px-4 py-2 rounded-lg text-sm transition-all ${
                   sortBy === 'newest'
-                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                    ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
                     : 'text-gray-400 hover:text-white hover:bg-slate-800'
                 }`}
               >
@@ -98,7 +98,7 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
                 onClick={() => setSortBy('popular')}
                 className={`px-4 py-2 rounded-lg text-sm transition-all ${
                   sortBy === 'popular'
-                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                    ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
                     : 'text-gray-400 hover:text-white hover:bg-slate-800'
                 }`}
               >
@@ -108,7 +108,7 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
                 onClick={() => setSortBy('price')}
                 className={`px-4 py-2 rounded-lg text-sm transition-all ${
                   sortBy === 'price'
-                    ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                    ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
                     : 'text-gray-400 hover:text-white hover:bg-slate-800'
                 }`}
               >
@@ -126,7 +126,7 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
             <button
               key={skin.id}
               onClick={() => onNavigate('skin', skin.id)}
-              className="group relative bg-slate-900/50 rounded-2xl overflow-hidden border border-slate-800/50 hover:border-purple-500/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/10"
+              className="group relative bg-slate-900/50 rounded-2xl overflow-hidden border border-slate-800/50 hover:border-orange-500/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-orange-500/10"
             >
               {/* Image Container */}
               <div className="relative aspect-[4/3] overflow-hidden bg-slate-950">
@@ -139,21 +139,21 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
                 
                 {/* Featured Badge */}
                 {skin.featured && (
-                  <div className="absolute top-3 right-3 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs flex items-center gap-1.5">
+                  <div className="absolute top-3 right-3 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full text-xs flex items-center gap-1.5">
                     <Sparkles className="w-3 h-3" />
                     <span>Featured</span>
                   </div>
                 )}
 
                 {/* Game Tag */}
-                <div className="absolute top-3 left-3 px-3 py-1.5 bg-slate-900/90 backdrop-blur-sm border border-slate-700/50 rounded-full text-xs text-purple-400">
+                <div className="absolute top-3 left-3 px-3 py-1.5 bg-slate-900/90 backdrop-blur-sm border border-slate-700/50 rounded-full text-xs text-orange-400">
                   {skin.gameName}
                 </div>
               </div>
 
               {/* Content */}
               <div className="p-5">
-                <h3 className="mb-2 text-left group-hover:text-purple-400 transition-colors line-clamp-1">
+                <h3 className="mb-2 text-left group-hover:text-orange-400 transition-colors line-clamp-1">
                   {skin.name}
                 </h3>
                 
@@ -180,10 +180,10 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
 
                 {/* Price Bar */}
                 <div className="flex items-center justify-between pt-4 border-t border-slate-800/50">
-                  <div className="text-2xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  <div className="text-2xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">
                     ${skin.price}
                   </div>
-                  <div className="px-4 py-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-lg text-sm text-purple-400 group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-pink-500 group-hover:text-white transition-all">
+                  <div className="px-4 py-2 bg-gradient-to-r from-orange-500/10 to-orange-500/10 border border-orange-500/20 rounded-lg text-sm text-orange-400 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition-all">
                     View Details
                   </div>
                 </div>

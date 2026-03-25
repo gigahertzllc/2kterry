@@ -195,7 +195,7 @@ export function SettingsTab() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-3"
+          className="px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center gap-3"
         >
           <UserPlus className="w-5 h-5" />
           <span>Create Admin Account</span>
@@ -247,7 +247,7 @@ export function SettingsTab() {
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
                           <User className="w-5 h-5" />
                         </div>
                         <div>{admin.name}</div>
@@ -255,7 +255,7 @@ export function SettingsTab() {
                     </td>
                     <td className="px-6 py-4 text-gray-400">{admin.email}</td>
                     <td className="px-6 py-4">
-                      <span className="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs text-purple-400">
+                      <span className="px-3 py-1 bg-orange-500/20 border border-orange-500/30 rounded-full text-xs text-orange-400">
                         {admin.role}
                       </span>
                     </td>
@@ -296,7 +296,7 @@ export function SettingsTab() {
             <button
               onClick={handleMigrateProducts}
               disabled={isMigrating}
-              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-purple-900 disabled:to-pink-900 disabled:cursor-not-allowed rounded-lg transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:from-orange-900 disabled:to-orange-900 disabled:cursor-not-allowed rounded-lg transition-all flex items-center gap-2"
             >
               <Database className="w-4 h-4" />
               <span>{isMigrating ? 'Migrating...' : 'Fix Images'}</span>
@@ -330,7 +330,7 @@ export function SettingsTab() {
             <button
               onClick={handleCheckStorage}
               disabled={isCheckingStorage}
-              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-purple-900 disabled:to-pink-900 disabled:cursor-not-allowed rounded-lg transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:from-orange-900 disabled:to-orange-900 disabled:cursor-not-allowed rounded-lg transition-all flex items-center gap-2"
             >
               <Wrench className="w-4 h-4" />
               <span>{isCheckingStorage ? 'Checking...' : 'Check Storage'}</span>
@@ -347,7 +347,7 @@ export function SettingsTab() {
             <button
               onClick={handleFixStorage}
               disabled={isFixingStorage}
-              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-purple-900 disabled:to-pink-900 disabled:cursor-not-allowed rounded-lg transition-all flex items-center gap-2"
+              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:from-orange-900 disabled:to-orange-900 disabled:cursor-not-allowed rounded-lg transition-all flex items-center gap-2"
             >
               <CheckCircle className="w-4 h-4" />
               <span>{isFixingStorage ? 'Fixing...' : 'Fix Storage'}</span>
@@ -359,10 +359,10 @@ export function SettingsTab() {
       {/* Create Admin Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
-          <div className="bg-slate-900 rounded-2xl border border-purple-500/20 max-w-md w-full">
-            <div className="relative bg-gradient-to-br from-purple-500/20 to-pink-500/20 p-8 border-b border-purple-500/20">
+          <div className="bg-slate-900 rounded-2xl border border-orange-500/20 max-w-md w-full">
+            <div className="relative bg-gradient-to-br from-orange-500/20 to-orange-500/20 p-8 border-b border-orange-500/20">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                   <UserPlus className="w-6 h-6" />
                 </div>
                 <h2>Create Admin Account</h2>
@@ -385,7 +385,7 @@ export function SettingsTab() {
                     type="text"
                     value={createForm.name}
                     onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     placeholder="John Doe"
                     required
                   />
@@ -400,7 +400,7 @@ export function SettingsTab() {
                     type="email"
                     value={createForm.email}
                     onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     placeholder="admin@2kterrysmods.com"
                     required
                   />
@@ -415,7 +415,7 @@ export function SettingsTab() {
                     type="password"
                     value={createForm.password}
                     onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     placeholder="Min. 8 characters"
                     required
                   />
@@ -430,7 +430,7 @@ export function SettingsTab() {
                     type="password"
                     value={createForm.confirmPassword}
                     onChange={(e) => setCreateForm({ ...createForm, confirmPassword: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     placeholder="Re-enter password"
                     required
                   />
@@ -440,7 +440,7 @@ export function SettingsTab() {
               <div className="flex gap-4">
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+                  className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all"
                 >
                   Create Account
                 </button>
@@ -464,7 +464,7 @@ export function SettingsTab() {
       {/* Reset Password Modal */}
       {showResetModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
-          <div className="bg-slate-900 rounded-2xl border border-purple-500/20 max-w-md w-full">
+          <div className="bg-slate-900 rounded-2xl border border-orange-500/20 max-w-md w-full">
             <div className="relative bg-gradient-to-br from-yellow-500/20 to-orange-500/20 p-8 border-b border-yellow-500/20">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
@@ -503,7 +503,7 @@ export function SettingsTab() {
                     type="password"
                     value={resetForm.newPassword}
                     onChange={(e) => setResetForm({ ...resetForm, newPassword: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     placeholder="Min. 8 characters"
                     required
                   />
@@ -518,7 +518,7 @@ export function SettingsTab() {
                     type="password"
                     value={resetForm.confirmPassword}
                     onChange={(e) => setResetForm({ ...resetForm, confirmPassword: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     placeholder="Re-enter new password"
                     required
                   />

@@ -29,7 +29,7 @@ export function DashboardPage({ games, skinPacks, onAddSkinPack, onUpdateSkinPac
   return (
     <div className="min-h-screen pt-20 bg-slate-950">
       {/* Dashboard Header */}
-      <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-b border-purple-500/20">
+      <div className="bg-gradient-to-br from-orange-500/20 to-orange-500/20 border-b border-orange-500/20">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <h1 className="mb-4">Admin Dashboard</h1>
           <p className="text-gray-400">Manage your store, customers, and orders</p>
@@ -48,7 +48,7 @@ export function DashboardPage({ games, skinPacks, onAddSkinPack, onUpdateSkinPac
                   onClick={() => setActiveTab(tab.id)}
                   className={`px-6 py-4 flex items-center gap-3 border-b-2 transition-all ${
                     activeTab === tab.id
-                      ? 'border-purple-500 text-white bg-slate-900'
+                      ? 'border-orange-500 text-white bg-slate-900'
                       : 'border-transparent text-gray-400 hover:text-white hover:bg-slate-800/50'
                   }`}
                 >

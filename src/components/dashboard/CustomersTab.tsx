@@ -61,7 +61,7 @@ export function CustomersTab() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-3"
+          className="px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center gap-3"
         >
           <UserPlus className="w-5 h-5" />
           <span>Add Customer</span>
@@ -85,14 +85,14 @@ export function CustomersTab() {
           <div className="text-3xl">{customers.length}</div>
         </div>
 
-        <div className="p-6 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl">
+        <div className="p-6 bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 rounded-2xl">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-sm text-gray-400">Total Orders</span>
           </div>
           <div className="text-3xl">{totalOrders}</div>
         </div>
 
-        <div className="p-6 bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-2xl">
+        <div className="p-6 bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 rounded-2xl">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-sm text-gray-400">Total Revenue</span>
           </div>
@@ -139,7 +139,7 @@ export function CustomersTab() {
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-orange-500 rounded-full flex items-center justify-center">
                           <User className="w-5 h-5" />
                         </div>
                         <div>{customer.name}</div>
@@ -163,10 +163,10 @@ export function CustomersTab() {
       {/* Create Customer Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
-          <div className="bg-slate-900 rounded-2xl border border-purple-500/20 max-w-md w-full">
-            <div className="relative bg-gradient-to-br from-purple-500/20 to-pink-500/20 p-8 border-b border-purple-500/20">
+          <div className="bg-slate-900 rounded-2xl border border-orange-500/20 max-w-md w-full">
+            <div className="relative bg-gradient-to-br from-orange-500/20 to-orange-500/20 p-8 border-b border-orange-500/20">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                   <UserPlus className="w-6 h-6" />
                 </div>
                 <h2>Add New Customer</h2>
@@ -189,7 +189,7 @@ export function CustomersTab() {
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     placeholder="John Doe"
                     required
                   />
@@ -204,7 +204,7 @@ export function CustomersTab() {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     placeholder="john@example.com"
                     required
                   />
@@ -219,7 +219,7 @@ export function CustomersTab() {
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
@@ -228,7 +228,7 @@ export function CustomersTab() {
               <div className="flex gap-4">
                 <button
                   type="submit"
-                  className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+                  className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all"
                 >
                   Add Customer
                 </button>

@@ -161,7 +161,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
         </div>
         <button
           onClick={() => setShowUploadModal(true)}
-          className="px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all flex items-center gap-3"
+          className="px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center gap-3"
         >
           <Plus className="w-5 h-5" />
           <span>Create New Pack</span>
@@ -170,9 +170,9 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-        <div className="p-6 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-2xl">
+        <div className="p-6 bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 rounded-2xl">
           <div className="flex items-center gap-3 mb-2">
-            <Package className="w-5 h-5 text-purple-400" />
+            <Package className="w-5 h-5 text-orange-400" />
             <span className="text-sm text-gray-400">Total Packs</span>
           </div>
           <div className="text-3xl">{skinPacks.length}</div>
@@ -188,7 +188,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
           </div>
         </div>
 
-        <div className="p-6 bg-gradient-to-br from-pink-500/10 to-pink-500/5 border border-pink-500/20 rounded-2xl">
+        <div className="p-6 bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 rounded-2xl">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-sm text-gray-400">Total Revenue</span>
           </div>
@@ -245,7 +245,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-purple-400">{skin.gameName}</td>
+                  <td className="px-6 py-4 text-orange-400">{skin.gameName}</td>
                   <td className="px-6 py-4">${skin.price}</td>
                   <td className="px-6 py-4">{skin.downloads.toLocaleString()}</td>
                   <td className="px-6 py-4">{skin.rating}</td>
@@ -297,7 +297,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     placeholder="e.g., Lakers Championship Pack"
                     required
                   />
@@ -310,7 +310,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                   <select
                     value={formData.gameId}
                     onChange={(e) => setFormData({ ...formData, gameId: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     required
                   >
                     <option value="">Select a game</option>
@@ -331,7 +331,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                     step="0.01"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     placeholder="14.99"
                     required
                   />
@@ -345,13 +345,13 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                       step="0.01"
                       value={formData.fileSizeValue}
                       onChange={(e) => setFormData({ ...formData, fileSizeValue: e.target.value })}
-                      className="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                      className="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                       placeholder="235"
                     />
                     <select
                       value={formData.fileSizeUnit}
                       onChange={(e) => setFormData({ ...formData, fileSizeUnit: e.target.value })}
-                      className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                      className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                     >
                       <option value="KB">KB</option>
                       <option value="MB">MB</option>
@@ -367,7 +367,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors h-24 resize-none"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors h-24 resize-none"
                   placeholder="Describe what's included in this skin pack..."
                 />
               </div>
@@ -394,10 +394,10 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                 <button
                   type="button"
                   onClick={() => document.getElementById('image-upload')?.click()}
-                  className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-purple-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
+                  className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
                 >
-                  <ImageIcon className="w-8 h-8 text-gray-400 group-hover:text-purple-400 transition-colors" />
-                  <span className="text-gray-400 group-hover:text-purple-400 transition-colors">
+                  <ImageIcon className="w-8 h-8 text-gray-400 group-hover:text-orange-400 transition-colors" />
+                  <span className="text-gray-400 group-hover:text-orange-400 transition-colors">
                     Click to upload images
                   </span>
                   <span className="text-xs text-gray-500">Accepts .jpg, .png, .gif</span>
@@ -420,7 +420,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                 {uploadedFile && (
                   <div className="mb-4 p-4 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Package className="w-5 h-5 text-purple-400" />
+                      <Package className="w-5 h-5 text-orange-400" />
                       <div>
                         <div className="text-sm">{uploadedFile}</div>
                         <div className="text-xs text-gray-400">Uploaded successfully</div>
@@ -439,10 +439,10 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                 <button
                   type="button"
                   onClick={() => document.getElementById('file-upload')?.click()}
-                  className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-purple-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
+                  className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group"
                 >
-                  <Upload className="w-8 h-8 text-gray-400 group-hover:text-purple-400 transition-colors" />
-                  <span className="text-gray-400 group-hover:text-purple-400 transition-colors">
+                  <Upload className="w-8 h-8 text-gray-400 group-hover:text-orange-400 transition-colors" />
+                  <span className="text-gray-400 group-hover:text-orange-400 transition-colors">
                     Click to upload skin pack file
                   </span>
                   <span className="text-xs text-gray-500">Accepts .zip files</span>
@@ -458,16 +458,16 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
               </div>
 
               {/* Featured Checkbox */}
-              <div className="mb-6 p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-lg">
+              <div className="mb-6 p-4 bg-gradient-to-br from-orange-500/10 to-orange-500/10 border border-orange-500/20 rounded-lg">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={formData.featured}
                     onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                    className="w-5 h-5 bg-slate-800 border-2 border-purple-500/50 rounded cursor-pointer accent-purple-500"
+                    className="w-5 h-5 bg-slate-800 border-2 border-orange-500/50 rounded cursor-pointer accent-orange-500"
                   />
                   <div>
-                    <div className="text-purple-400 group-hover:text-purple-300 transition-colors">
+                    <div className="text-orange-400 group-hover:text-orange-300 transition-colors">
                       Add to Hero Slider
                     </div>
                     <div className="text-xs text-gray-400">
@@ -480,7 +480,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
               <div className="flex gap-4">
                 <button
                   type="submit"
-                  className="flex-1 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+                  className="flex-1 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all"
                 >
                   {editingSkinPack ? 'Update Skin Pack' : 'Create Skin Pack'}
                 </button>

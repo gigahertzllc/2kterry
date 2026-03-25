@@ -47,10 +47,10 @@ export function Navigation({ currentPage, onNavigate, onLogoClick, onAdminAccess
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-purple-500/20">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-950/90 backdrop-blur-xl border-b border-cyan-600/20">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <button 
+          <button
             onClick={onLogoClick}
             onMouseDown={handlePressStart}
             onMouseUp={handlePressEnd}
@@ -60,7 +60,7 @@ export function Navigation({ currentPage, onNavigate, onLogoClick, onAdminAccess
             className="flex items-center gap-3 group relative select-none"
           >
             <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded flex items-center justify-center">
                 <ShoppingBag className="w-6 h-6" />
               </div>
               {/* Progress ring */}
@@ -82,7 +82,7 @@ export function Navigation({ currentPage, onNavigate, onLogoClick, onAdminAccess
                 </svg>
               )}
             </div>
-            <span className="text-xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent group-hover:from-purple-300 group-hover:to-pink-300 transition-all">
+            <span className="text-xl text-orange-400 group-hover:text-orange-300 transition-all font-semibold">
               2kTerrysMods
             </span>
           </button>
@@ -90,10 +90,10 @@ export function Navigation({ currentPage, onNavigate, onLogoClick, onAdminAccess
           <div className="flex items-center gap-2">
             <button
               onClick={() => onNavigate('home')}
-              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
+              className={`px-4 py-2 flex items-center gap-2 transition-all ${
                 currentPage === 'home'
-                  ? 'bg-purple-500 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-orange-500 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-slate-800'
               }`}
             >
               <Home className="w-4 h-4" />
@@ -102,10 +102,10 @@ export function Navigation({ currentPage, onNavigate, onLogoClick, onAdminAccess
 
             <button
               onClick={() => onNavigate('shop')}
-              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
+              className={`px-4 py-2 flex items-center gap-2 transition-all ${
                 currentPage === 'shop'
-                  ? 'bg-purple-500 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-orange-500 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-slate-800'
               }`}
             >
               <ShoppingBag className="w-4 h-4" />
@@ -114,10 +114,10 @@ export function Navigation({ currentPage, onNavigate, onLogoClick, onAdminAccess
 
             <button
               onClick={() => onNavigate('about')}
-              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
+              className={`px-4 py-2 flex items-center gap-2 transition-all ${
                 currentPage === 'about'
-                  ? 'bg-purple-500 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-orange-500 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-slate-800'
               }`}
             >
               <Info className="w-4 h-4" />
@@ -126,10 +126,10 @@ export function Navigation({ currentPage, onNavigate, onLogoClick, onAdminAccess
 
             <button
               onClick={() => onNavigate('donation')}
-              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
+              className={`px-4 py-2 flex items-center gap-2 transition-all ${
                 currentPage === 'donation'
-                  ? 'bg-purple-500 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-orange-500 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-slate-800'
               }`}
             >
               <Heart className="w-4 h-4" />

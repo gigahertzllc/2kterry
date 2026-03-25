@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: 139 92 246;
-  --color-secondary: 236 72 153;
-  --color-accent: 59 130 246;
-  --color-dark: 15 23 42;
-  --color-darker: 2 6 23;
+  --color-primary: 13 59 74;
+  --color-secondary: 19 78 94;
+  --color-accent: 249 115 22;
+  --color-dark: 15 35 41;
+  --color-darker: 2 20 29;
 }
 
 body {

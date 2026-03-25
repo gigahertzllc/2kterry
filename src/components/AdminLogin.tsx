@@ -30,9 +30,9 @@ export function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
-      <div className="bg-slate-900 rounded-2xl border border-purple-500/20 max-w-md w-full overflow-hidden">
+      <div className="bg-slate-900 rounded-2xl border border-orange-500/20 max-w-md w-full overflow-hidden">
         {/* Header */}
-        <div className="relative bg-gradient-to-br from-purple-500/20 to-pink-500/20 p-8 border-b border-purple-500/20">
+        <div className="relative bg-gradient-to-br from-orange-500/20 to-orange-500/20 p-8 border-b border-orange-500/20">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 w-10 h-10 hover:bg-slate-800 rounded-lg flex items-center justify-center transition-colors"
@@ -41,7 +41,7 @@ export function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps) {
           </button>
           
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
               <Lock className="w-6 h-6" />
             </div>
             <h2>Admin Login</h2>
@@ -65,7 +65,7 @@ export function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                 placeholder="admin@2kterrysmods.com"
                 required
               />
@@ -80,7 +80,7 @@ export function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps) {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
                 placeholder="Enter password"
                 required
               />
@@ -90,7 +90,7 @@ export function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Logging in...' : 'Login to Dashboard'}
           </button>
