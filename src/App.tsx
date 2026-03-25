@@ -21,42 +21,35 @@ export default function App() {
   const [adminSession, setAdminSession] = useState<any>(null);
   const [adminData, setAdminData] = useState<any>(null);
 
-  // Initialize and load data from Supabase
+  // Initialize and load data - always use mock data as base, merge Supabase admin-created products
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
       try {
         // Try to create default admin if none exist
         try {
-          const setupResult = await api.adminSetup();
-          if (setupResult.success) {
-            console.log('✅ Default admin created!');
-            console.log('📧 Email:', setupResult.credentials.email);
-            console.log('🔑 Password:', setupResult.credentials.password);
-            alert(`Default admin created!\n\nEmail: ${setupResult.credentials.email}\nPassword: ${setupResult.credentials.password}\n\nSave these credentials!`);
-          }
+          await api.adminSetup();
         } catch (error) {
           // Admin already exists, that's fine
-          console.log('Admin accounts already configured');
         }
-        
+
         // Initialize database with default games
         await api.initializeDatabase();
-        
-        // Load games and skin packs
-        const [gamesData, skinPacksData] = await Promise.all([
-          api.getGames(),
-          api.getSkinPacks()
-        ]);
-        
-        // Use Supabase data if available, otherwise fall back to mock data
-        const loadedGames = gamesData.games.length > 0 ? gamesData.games : defaultGames;
-        const loadedSkinPacks = skinPacksData.skinPacks.length > 0 ? skinPacksData.skinPacks : defaultSkinPacks;
 
-        setGames(loadedGames);
-        setSkinPacks(loadedSkinPacks);
+        // Load any admin-created skin packs from Supabase
+        const skinPacksData = await api.getSkinPacks();
 
-        console.log(`Loaded ${loadedSkinPacks.length} skin packs (${skinPacksData.skinPacks.length > 0 ? 'from database' : 'using defaults'})`);
+        // Always start with our default mock data as the base
+        // Then add any Supabase products that aren't already in the defaults (admin-created ones)
+        const defaultIds = new Set(defaultSkinPacks.map(s => s.id));
+        const adminCreatedPacks = (skinPacksData.skinPacks || []).filter(
+          (s: SkinPack) => !defaultIds.has(s.id)
+        );
+
+        setGames(defaultGames);
+        setSkinPacks([...defaultSkinPacks, ...adminCreatedPacks]);
+
+        console.log(`Loaded ${defaultSkinPacks.length} default + ${adminCreatedPacks.length} admin-created skin packs`);
       } catch (error) {
         console.error('Error loading data, using defaults:', error);
         setGames(defaultGames);
@@ -65,7 +58,7 @@ export default function App() {
         setIsLoading(false);
       }
     }
-    
+
     loadData();
   }, []);
 
