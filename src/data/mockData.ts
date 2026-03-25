@@ -24,11 +24,11 @@ export const skinPacks: SkinPack[] = [
     gameId: '1',
     gameName: 'NBA 2K26',
     images: [
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
-      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800'
+      '/images/brand/cyberface-giveaway.jpg',
+      '/images/brand/poster-silhouettes.jpg',
+      '/images/brand/fog-court.jpg'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+    thumbnail: '/images/brand/cyberface-giveaway.jpg',
     downloads: 3250,
     rating: 4.9,
     dateAdded: '2026-03-20',
@@ -43,11 +43,11 @@ export const skinPacks: SkinPack[] = [
     gameId: '2',
     gameName: 'NBA 2K25',
     images: [
-      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
-      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800'
+      '/images/brand/bulls-cyberface.jpg',
+      '/images/brand/cyberface-giveaway.jpg',
+      '/images/brand/mascot-hero.jpg'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+    thumbnail: '/images/brand/bulls-cyberface.jpg',
     downloads: 5120,
     rating: 4.8,
     dateAdded: '2026-03-15',
@@ -62,11 +62,11 @@ export const skinPacks: SkinPack[] = [
     gameId: '1',
     gameName: 'NBA 2K26',
     images: [
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
-      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800'
+      '/images/brand/fog-court.jpg',
+      '/images/brand/poster-silhouettes.jpg',
+      '/images/brand/cyberface-giveaway.jpg'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+    thumbnail: '/images/brand/fog-court.jpg',
     downloads: 2890,
     rating: 4.7,
     dateAdded: '2026-03-10',
@@ -80,11 +80,11 @@ export const skinPacks: SkinPack[] = [
     gameId: '2',
     gameName: 'NBA 2K25',
     images: [
-      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
-      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800'
+      '/images/brand/poster-silhouettes.jpg',
+      '/images/brand/fog-court.jpg',
+      '/images/brand/bulls-cyberface.jpg'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+    thumbnail: '/images/brand/poster-silhouettes.jpg',
     downloads: 4100,
     rating: 4.6,
     dateAdded: '2026-03-05',
@@ -98,11 +98,11 @@ export const skinPacks: SkinPack[] = [
     gameId: '1',
     gameName: 'NBA 2K26',
     images: [
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
-      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800'
+      '/images/brand/mascot-hero.jpg',
+      '/images/brand/cyberface-giveaway.jpg',
+      '/images/brand/fog-court.jpg'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
+    thumbnail: '/images/brand/mascot-hero.jpg',
     downloads: 1850,
     rating: 4.9,
     dateAdded: '2026-02-28',
@@ -117,11 +117,11 @@ export const skinPacks: SkinPack[] = [
     gameId: '2',
     gameName: 'NBA 2K25',
     images: [
-      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
-      'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800'
+      '/images/brand/mascot-hero-2.jpg',
+      '/images/brand/fog-court.jpg',
+      '/images/brand/poster-silhouettes.jpg'
     ],
-    thumbnail: 'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800',
+    thumbnail: '/images/brand/mascot-hero-2.jpg',
     downloads: 2340,
     rating: 4.8,
     dateAdded: '2026-02-20',

@@ -182,32 +182,33 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
           </>
         ) : (
           <>
-            <div
-              className="absolute inset-0 bg-gradient-to-br from-cyan-950 via-cyan-900 to-cyan-800"
-              style={{
-                backgroundImage: `radial-gradient(circle at 25% 25%, rgba(34, 197, 235, 0.1) 0%, transparent 50%),
-                                  radial-gradient(circle at 75% 75%, rgba(249, 115, 22, 0.08) 0%, transparent 50%)`
-              }}
-            >
-              <svg className="absolute inset-0 w-full h-full opacity-10" preserveAspectRatio="none">
-                <defs>
-                  <pattern id="court-lines" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-                    <line x1="0" y1="50" x2="100" y2="50" stroke="white" strokeWidth="1" />
-                    <circle cx="50" cy="50" r="30" fill="none" stroke="white" strokeWidth="1" />
-                    <rect x="0" y="20" width="100" height="60" fill="none" stroke="white" strokeWidth="1" />
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#court-lines)" />
-              </svg>
-              <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/60 via-cyan-900/40 to-cyan-950/80"></div>
-              <div className="absolute inset-0 backdrop-blur-sm"></div>
+            {/* Court background */}
+            <div className="absolute inset-0">
+              <img
+                src="/images/brand/fog-court.jpg"
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-transparent to-slate-950/50"></div>
+              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-transparent to-slate-950"></div>
             </div>
 
-            <div className="relative z-10 text-left px-6 max-w-5xl">
-              <h1 className="mb-6 text-6xl lg:text-7xl font-bold text-white leading-tight">
-                WELCOME TO<br />2K TERRY'S MODS
+            {/* Mascot image - right side */}
+            <div className="absolute right-0 top-0 bottom-0 w-1/2 lg:w-[55%] hidden md:flex items-end justify-center overflow-hidden">
+              <img
+                src="/images/brand/mascot-hero.jpg"
+                alt="2K Terry's Mods Mascot"
+                className="h-full w-full object-cover object-top"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-transparent"></div>
+            </div>
+
+            {/* Text content - left side */}
+            <div className="relative z-10 text-left px-6 lg:px-16 max-w-3xl">
+              <h1 className="mb-4 text-5xl lg:text-7xl font-bold text-white leading-tight tracking-tight">
+                WELCOME TO<br />2K TERRYS MODS
               </h1>
-              <p className="text-2xl text-gray-200 mb-8 max-w-2xl">
+              <p className="text-xl lg:text-2xl text-gray-300 mb-8 max-w-lg">
                 Enhance Your 2K Experience
               </p>
               <button
