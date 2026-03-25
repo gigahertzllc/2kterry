@@ -5,7 +5,7 @@ import { ShopPage } from './components/ShopPage';
 import { SkinDetailPage } from './components/SkinDetailPage';
 import { DashboardPage } from './components/DashboardPage';
 import { AdminLogin } from './components/AdminLogin';
-import { games, skinPacks as initialSkinPacks } from './data/mockData';
+import { games as defaultGames, skinPacks as defaultSkinPacks } from './data/mockData';
 import { SkinPack } from './types';
 import { useEffect } from 'react';
 import * as api from './utils/api';
@@ -49,12 +49,18 @@ export default function App() {
           api.getSkinPacks()
         ]);
         
-        setGames(gamesData.games);
-        setSkinPacks(skinPacksData.skinPacks);
-        
-        console.log(`Loaded ${skinPacksData.skinPacks.length} skin packs from database`);
+        // Use Supabase data if available, otherwise fall back to mock data
+        const loadedGames = gamesData.games.length > 0 ? gamesData.games : defaultGames;
+        const loadedSkinPacks = skinPacksData.skinPacks.length > 0 ? skinPacksData.skinPacks : defaultSkinPacks;
+
+        setGames(loadedGames);
+        setSkinPacks(loadedSkinPacks);
+
+        console.log(`Loaded ${loadedSkinPacks.length} skin packs (${skinPacksData.skinPacks.length > 0 ? 'from database' : 'using defaults'})`);
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('Error loading data, using defaults:', error);
+        setGames(defaultGames);
+        setSkinPacks(defaultSkinPacks);
       } finally {
         setIsLoading(false);
       }
