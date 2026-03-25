@@ -69,6 +69,14 @@ export default function App() {
     loadData();
   }, []);
 
+  // Check URL hash for direct admin access
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash === 'admin') {
+      setShowAdminLogin(true);
+    }
+  }, []);
+
   const handleNavigate = (page: string, skinId?: string) => {
     // Check if trying to access dashboard
     if (page === 'dashboard' && !isAdminLoggedIn) {
