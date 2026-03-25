@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { ArrowLeft, Download, Star, ShoppingCart, ChevronLeft, ChevronRight, Loader } from 'lucide-react';
+import { ArrowLeft, Download, Star, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SkinPack } from '../types';
-import { STRIPE_CONFIG } from '../config/stripe';
 import { toast } from 'sonner';
-import * as api from '../utils/api';
 
 interface SkinDetailPageProps {
   skin: SkinPack;
@@ -13,7 +11,6 @@ interface SkinDetailPageProps {
 export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % skin.images.length);
@@ -23,41 +20,22 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
     setCurrentImageIndex((prev) => (prev - 1 + skin.images.length) % skin.images.length);
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     // Free mods: Direct download
     if (skin.price === 0) {
-      if ((skin as any).downloadUrl) {
-        window.open((skin as any).downloadUrl, '_blank');
+      if (skin.downloadUrl) {
+        window.open(skin.downloadUrl, '_blank');
+      } else {
+        toast.info('Download link coming soon!');
       }
       return;
     }
 
-    // Paid mods: Stripe checkout
-    if (!STRIPE_CONFIG.isConfigured()) {
-      toast.info('Payments coming soon! Stripe configuration needed.');
-      return;
-    }
-
-    setIsCheckingOut(true);
-    try {
-      const priceInCents = Math.round(skin.price * 100);
-      const { sessionId } = await api.createCheckoutSession({
-        skinPackId: skin.id,
-        skinPackName: skin.name,
-        priceInCents
-      });
-
-      const stripe = await STRIPE_CONFIG.getStripe();
-      const { error } = await stripe.redirectToCheckout({ sessionId });
-
-      if (error) {
-        toast.error('Checkout error: ' + error.message);
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      toast.error('Failed to start checkout. Please try again.');
-    } finally {
-      setIsCheckingOut(false);
+    // Paid mods: Stripe Payment Link
+    if (skin.stripePaymentLink) {
+      window.open(skin.stripePaymentLink, '_blank');
+    } else {
+      toast.info('This mod will be available for purchase soon!');
     }
   };
 
@@ -171,18 +149,17 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
 
                 <button
                   onClick={handleCheckout}
-                  disabled={isCheckingOut}
-                  className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-3 group mb-4 disabled:opacity-75 disabled:cursor-not-allowed"
+                  className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-3 group mb-4"
                 >
-                  {isCheckingOut ? (
+                  {skin.price === 0 ? (
                     <>
-                      <Loader className="w-5 h-5 animate-spin" />
-                      <span>Processing...</span>
+                      <Download className="w-5 h-5" />
+                      <span>Download Free</span>
                     </>
                   ) : (
                     <>
                       <ShoppingCart className="w-5 h-5" />
-                      <span>{skin.price === 0 ? 'Download Free' : 'Buy Now'}</span>
+                      <span>Buy Now — ${skin.price}</span>
                     </>
                   )}
                 </button>

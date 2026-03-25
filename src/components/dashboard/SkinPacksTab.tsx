@@ -27,6 +27,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     fileSizeUnit: 'MB',
     featured: false,
     downloadUrl: '',
+    stripePaymentLink: '',
   });
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadedImagePaths, setUploadedImagePaths] = useState<string[]>([]);
@@ -55,7 +56,8 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
       fileSizeValue,
       fileSizeUnit,
       featured: skin.featured || false,
-      downloadUrl: (skin as any).downloadUrl || '',
+      downloadUrl: skin.downloadUrl || '',
+      stripePaymentLink: skin.stripePaymentLink || '',
     });
     setUploadedImages(skin.images);
     setUploadedImagePaths(skin.images);
@@ -65,7 +67,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
   const handleCloseModal = () => {
     setShowUploadModal(false);
     setEditingSkinPack(null);
-    setFormData({ name: '', description: '', price: '', gameId: '', fileSizeValue: '', fileSizeUnit: 'MB', featured: false, downloadUrl: '' });
+    setFormData({ name: '', description: '', price: '', gameId: '', fileSizeValue: '', fileSizeUnit: 'MB', featured: false, downloadUrl: '', stripePaymentLink: '' });
     setUploadedImages([]);
     setUploadedImagePaths([]);
     setUploadedFile(null);
@@ -97,6 +99,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
       fileSize: `${formData.fileSizeValue} ${formData.fileSizeUnit}`,
       featured: formData.featured,
       downloadUrl: formData.downloadUrl || undefined,
+      stripePaymentLink: formData.stripePaymentLink || undefined,
     };
 
     if (editingSkinPack) {
@@ -513,6 +516,21 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                   placeholder="https://drive.google.com/file/d/..."
                 />
               </div>
+
+              {/* Stripe Payment Link (for paid mods) */}
+              {parseFloat(formData.price) > 0 && (
+                <div className="mb-6 p-4 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-lg">
+                  <label className="block text-sm text-purple-400 mb-2">Stripe Payment Link</label>
+                  <p className="text-xs text-gray-500 mb-2">Create a Payment Link in your Stripe dashboard and paste it here. Customers will be redirected to Stripe to pay.</p>
+                  <input
+                    type="text"
+                    value={formData.stripePaymentLink}
+                    onChange={(e) => setFormData({ ...formData, stripePaymentLink: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-800 border border-purple-500/30 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                    placeholder="https://buy.stripe.com/..."
+                  />
+                </div>
+              )}
 
               {/* File Upload Section */}
               <div className="mb-6">
