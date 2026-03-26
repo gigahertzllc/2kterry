@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil, CheckCircle2, AlertCircle, Cloud, Loader2 } from 'lucide-react';
 import { Game, SkinPack } from '../../types';
 import * as api from '../../utils/api';
 import { toast } from 'sonner';
@@ -7,12 +7,91 @@ import { UploadProgress } from '../ui/UploadProgress';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
 import { uploadFileWithProgress, validateFile, formatFileSize } from '../../utils/storage';
 
+const ADMIN_SECRET = 'TerryMods2025!';
+
 interface SkinPacksTabProps {
   games: Game[];
   skinPacks: SkinPack[];
   onAddSkinPack: (skinPack: Omit<SkinPack, 'id'>) => void;
   onUpdateSkinPack: (id: string, skinPack: Omit<SkinPack, 'id'>) => void;
   onDeleteSkinPack: (id: string) => void;
+}
+
+// Upload file directly to R2 via presigned URL
+async function uploadToR2(file: File, onProgress?: (progress: number) => void): Promise<{ r2Key: string; publicUrl: string }> {
+  // Step 1: Get presigned upload URL from our API
+  const response = await fetch('/api/upload-url', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${ADMIN_SECRET}`,
+    },
+    body: JSON.stringify({
+      filename: file.name,
+      contentType: file.type || 'application/zip',
+      fileSize: file.size,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Failed to get upload URL' }));
+    throw new Error(err.error || 'Failed to get upload URL');
+  }
+
+  const { uploadUrl, r2Key, publicUrl } = await response.json();
+
+  // Step 2: Upload file directly to R2 using presigned URL (with progress)
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) {
+        const progress = (e.loaded / e.total) * 100;
+        onProgress?.(progress);
+      }
+    });
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve({ r2Key, publicUrl });
+      } else {
+        reject(new Error(`Upload failed with status ${xhr.status}`));
+      }
+    });
+
+    xhr.addEventListener('error', () => reject(new Error('Network error during upload')));
+    xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+
+    xhr.open('PUT', uploadUrl);
+    xhr.setRequestHeader('Content-Type', file.type || 'application/zip');
+    xhr.send(file);
+  });
+}
+
+// Auto-create Stripe product + payment link
+async function createStripeProduct(data: {
+  name: string;
+  description: string;
+  price: number;
+  imageUrl?: string;
+  downloadUrl?: string;
+  r2Key?: string;
+}): Promise<{ stripePaymentLink: string; stripeProductId: string; stripePriceId: string }> {
+  const response = await fetch('/api/create-product', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${ADMIN_SECRET}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Failed to create product' }));
+    throw new Error(err.error || 'Failed to create Stripe product');
+  }
+
+  return response.json();
 }
 
 export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack, onDeleteSkinPack }: SkinPacksTabProps) {
@@ -26,28 +105,35 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     fileSizeValue: '',
     fileSizeUnit: 'MB',
     featured: false,
-    downloadUrl: '',
-    stripePaymentLink: '',
   });
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadedImagePaths, setUploadedImagePaths] = useState<string[]>([]);
   const [imageUploadProgress, setImageUploadProgress] = useState<{ [key: string]: number }>({});
   const [isUploadingImages, setIsUploadingImages] = useState(false);
-  const [fileUploadProgress, setFileUploadProgress] = useState(0);
-  const [isUploadingFile, setIsUploadingFile] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
-  const [uploadedFilePath, setUploadedFilePath] = useState<string | null>(null);
+
+  // Mod file state
+  const [modFile, setModFile] = useState<File | null>(null);
+  const [modFileR2Key, setModFileR2Key] = useState<string | null>(null);
+  const [modFilePublicUrl, setModFilePublicUrl] = useState<string | null>(null);
+  const [modFileProgress, setModFileProgress] = useState(0);
+  const [isUploadingModFile, setIsUploadingModFile] = useState(false);
+  const [modFileUploaded, setModFileUploaded] = useState(false);
+
+  // Submit state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStep, setSubmitStep] = useState('');
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleOpenEditModal = (skin: SkinPack) => {
     setEditingSkinPack(skin);
-    
+
     const fileSizeMatch = skin.fileSize.match(/^(\d+(?:\.\d+)?)\s*([A-Z]+)$/i);
     const fileSizeValue = fileSizeMatch ? fileSizeMatch[1] : '';
     const fileSizeUnit = fileSizeMatch ? fileSizeMatch[2].toUpperCase() : 'MB';
-    
+
     setFormData({
       name: skin.name,
       description: skin.description || '',
@@ -56,25 +142,78 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
       fileSizeValue,
       fileSizeUnit,
       featured: skin.featured || false,
-      downloadUrl: skin.downloadUrl || '',
-      stripePaymentLink: skin.stripePaymentLink || '',
     });
     setUploadedImages(skin.images);
     setUploadedImagePaths(skin.images);
+    if (skin.downloadUrl) {
+      setModFilePublicUrl(skin.downloadUrl);
+      setModFileUploaded(true);
+    }
+    if (skin.r2Key) {
+      setModFileR2Key(skin.r2Key);
+    }
     setShowUploadModal(true);
   };
 
   const handleCloseModal = () => {
     setShowUploadModal(false);
     setEditingSkinPack(null);
-    setFormData({ name: '', description: '', price: '', gameId: '', fileSizeValue: '', fileSizeUnit: 'MB', featured: false, downloadUrl: '', stripePaymentLink: '' });
+    setFormData({ name: '', description: '', price: '', gameId: '', fileSizeValue: '', fileSizeUnit: 'MB', featured: false });
     setUploadedImages([]);
     setUploadedImagePaths([]);
-    setUploadedFile(null);
-    setUploadedFilePath(null);
+    setModFile(null);
+    setModFileR2Key(null);
+    setModFilePublicUrl(null);
+    setModFileProgress(0);
+    setIsUploadingModFile(false);
+    setModFileUploaded(false);
+    setIsSubmitting(false);
+    setSubmitStep('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handle mod file selection — immediately upload to R2
+  const handleModFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+
+    const file = e.target.files[0];
+
+    // Allow zip and rar files up to 500MB
+    if (file.size > 500 * 1024 * 1024) {
+      toast.error('File is too large. Maximum size is 500MB.');
+      return;
+    }
+
+    setModFile(file);
+    setIsUploadingModFile(true);
+    setModFileProgress(0);
+    setModFileUploaded(false);
+
+    try {
+      toast.info(`Uploading ${file.name} to cloud storage...`);
+
+      const { r2Key, publicUrl } = await uploadToR2(file, (progress) => {
+        setModFileProgress(progress);
+      });
+
+      setModFileR2Key(r2Key);
+      setModFilePublicUrl(publicUrl);
+      setModFileUploaded(true);
+      setIsUploadingModFile(false);
+
+      // Auto-fill file size
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(0);
+      setFormData(prev => ({ ...prev, fileSizeValue: sizeMB, fileSizeUnit: 'MB' }));
+
+      toast.success(`${file.name} uploaded to R2 successfully!`);
+    } catch (error) {
+      console.error('R2 upload error:', error);
+      toast.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setIsUploadingModFile(false);
+      setModFile(null);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.gameId || !formData.price) {
@@ -82,35 +221,86 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
       return;
     }
 
+    if (!modFilePublicUrl && !editingSkinPack?.downloadUrl) {
+      toast.error('Please upload a mod file first');
+      return;
+    }
+
+    setIsSubmitting(true);
+    const price = parseFloat(formData.price);
     const game = games.find(g => g.id === formData.gameId);
     const imagesToStore = uploadedImagePaths.length > 0 ? uploadedImagePaths : [game?.image || ''];
 
-    const newSkinPack: Omit<SkinPack, 'id'> = {
-      name: formData.name,
-      description: formData.description,
-      price: parseFloat(formData.price),
-      gameId: formData.gameId,
-      gameName: game?.name || '',
-      images: imagesToStore,
-      thumbnail: imagesToStore[0] || game?.image || '',
-      downloads: 0,
-      rating: 5.0,
-      dateAdded: new Date().toISOString().split('T')[0],
-      fileSize: `${formData.fileSizeValue} ${formData.fileSizeUnit}`,
-      featured: formData.featured,
-      downloadUrl: formData.downloadUrl || undefined,
-      stripePaymentLink: formData.stripePaymentLink || undefined,
-    };
+    let downloadUrl = modFilePublicUrl || editingSkinPack?.downloadUrl || '';
+    let stripePaymentLink = editingSkinPack?.stripePaymentLink;
+    let stripeProductId = editingSkinPack?.stripeProductId;
+    let stripePriceId = editingSkinPack?.stripePriceId;
 
-    if (editingSkinPack) {
-      onUpdateSkinPack(editingSkinPack.id, newSkinPack);
-      toast.success('Skin pack updated successfully!');
-    } else {
-      onAddSkinPack(newSkinPack);
-      toast.success('Skin pack created successfully!');
+    try {
+      // If paid mod and no existing payment link — auto-create Stripe product
+      if (price > 0 && !stripePaymentLink) {
+        setSubmitStep('Creating Stripe product & payment link...');
+        toast.info('Setting up Stripe payment...');
+
+        try {
+          const stripeResult = await createStripeProduct({
+            name: formData.name,
+            description: formData.description,
+            price,
+            imageUrl: imagesToStore[0] || undefined,
+            downloadUrl,
+            r2Key: modFileR2Key || undefined,
+          });
+
+          stripePaymentLink = stripeResult.stripePaymentLink;
+          stripeProductId = stripeResult.stripeProductId;
+          stripePriceId = stripeResult.stripePriceId;
+
+          toast.success('Stripe product created automatically!');
+        } catch (stripeErr) {
+          console.error('Stripe error:', stripeErr);
+          toast.error(`Stripe setup failed: ${stripeErr instanceof Error ? stripeErr.message : 'Unknown error'}. You can add the payment link manually later.`);
+        }
+      }
+
+      setSubmitStep('Saving skin pack...');
+
+      const newSkinPack: Omit<SkinPack, 'id'> = {
+        name: formData.name,
+        description: formData.description,
+        price,
+        gameId: formData.gameId,
+        gameName: game?.name || '',
+        images: imagesToStore,
+        thumbnail: imagesToStore[0] || game?.image || '',
+        downloads: editingSkinPack?.downloads || 0,
+        rating: editingSkinPack?.rating || 5.0,
+        dateAdded: editingSkinPack?.dateAdded || new Date().toISOString().split('T')[0],
+        fileSize: `${formData.fileSizeValue} ${formData.fileSizeUnit}`,
+        featured: formData.featured,
+        downloadUrl,
+        stripePaymentLink,
+        stripeProductId,
+        stripePriceId,
+        r2Key: modFileR2Key || editingSkinPack?.r2Key,
+      };
+
+      if (editingSkinPack) {
+        onUpdateSkinPack(editingSkinPack.id, newSkinPack);
+        toast.success('Skin pack updated!');
+      } else {
+        onAddSkinPack(newSkinPack);
+        toast.success('Skin pack created!');
+      }
+
+      handleCloseModal();
+    } catch (error) {
+      console.error('Submit error:', error);
+      toast.error('Failed to save skin pack. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+      setSubmitStep('');
     }
-
-    handleCloseModal();
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,8 +326,6 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
           });
         } catch (error) {
           console.error(`Error uploading ${file.name}:`, error);
-          toast.error(`Failed to upload ${file.name}`);
-          // If upload fails, use blob URL as fallback
           return { path: URL.createObjectURL(file) };
         }
       });
@@ -149,10 +337,10 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
       setUploadedImagePaths(prev => [...prev, ...paths]);
       setImageUploadProgress({});
       setIsUploadingImages(false);
-      toast.success(`${files.length} image(s) uploaded successfully`);
+      toast.success(`${files.length} image(s) uploaded`);
     } catch (error) {
       console.error('Error uploading images:', error);
-      toast.error(`Failed to upload images: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error('Failed to upload images');
       setIsUploadingImages(false);
     }
   };
@@ -172,7 +360,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     setIsDeleting(true);
     try {
       onDeleteSkinPack(deleteTargetId);
-      toast.success('Skin pack deleted successfully');
+      toast.success('Skin pack deleted');
     } catch (error) {
       toast.error('Failed to delete skin pack');
     } finally {
@@ -182,45 +370,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     }
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-
-    const file = e.target.files[0];
-
-    // Validate file before upload
-    const validation = validateFile(file, {
-      maxSizeBytes: 50 * 1024 * 1024, // 50MB
-      allowedTypes: ['application/zip']
-    });
-
-    if (!validation.valid) {
-      toast.error(validation.error || 'File validation failed');
-      return;
-    }
-
-    setIsUploadingFile(true);
-    setFileUploadProgress(0);
-
-    try {
-      const uploadResult = await uploadFileWithProgress(file, 'upload-file', {
-        onProgress: (progress) => {
-          setFileUploadProgress(progress);
-        }
-      });
-      const path = uploadResult.path;
-
-      setUploadedFilePath(path);
-      setUploadedFile(file.name);
-      setFileUploadProgress(0);
-      setIsUploadingFile(false);
-      toast.success(`${file.name} uploaded successfully`);
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      toast.error(`Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setFileUploadProgress(0);
-      setIsUploadingFile(false);
-    }
-  };
+  const isPaid = parseFloat(formData.price) > 0;
 
   return (
     <>
@@ -299,7 +449,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
             </thead>
             <tbody>
               {skinPacks.map((skin, index) => (
-                <tr 
+                <tr
                   key={skin.id}
                   className={`${index % 2 === 0 ? 'bg-slate-900' : 'bg-slate-900/50'} hover:bg-slate-800/50 transition-colors`}
                 >
@@ -317,7 +467,13 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                     </div>
                   </td>
                   <td className="px-6 py-4 text-orange-400">{skin.gameName}</td>
-                  <td className="px-6 py-4">${skin.price}</td>
+                  <td className="px-6 py-4">
+                    {skin.price === 0 ? (
+                      <span className="text-green-400">Free</span>
+                    ) : (
+                      <span>${skin.price}</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4">{skin.downloads.toLocaleString()}</td>
                   <td className="px-6 py-4">{skin.rating}</td>
                   <td className="px-6 py-4 text-gray-400">{new Date(skin.dateAdded).toLocaleDateString()}</td>
@@ -359,6 +515,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
             </div>
 
             <form onSubmit={handleSubmit} className="p-6">
+              {/* Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">
@@ -400,12 +557,16 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                   <input
                     type="number"
                     step="0.01"
+                    min="0"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
-                    placeholder="14.99"
+                    placeholder="0 for free, or 9.99 for paid"
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {isPaid ? '💰 Stripe payment link will be auto-created' : '🎁 Free — direct download from R2'}
+                  </p>
                 </div>
 
                 <div>
@@ -417,7 +578,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                       value={formData.fileSizeValue}
                       onChange={(e) => setFormData({ ...formData, fileSizeValue: e.target.value })}
                       className="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
-                      placeholder="235"
+                      placeholder="Auto-filled on upload"
                     />
                     <select
                       value={formData.fileSizeUnit}
@@ -427,7 +588,6 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                       <option value="KB">KB</option>
                       <option value="MB">MB</option>
                       <option value="GB">GB</option>
-                      <option value="TB">TB</option>
                     </select>
                   </div>
                 </div>
@@ -441,6 +601,95 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                   className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors h-24 resize-none"
                   placeholder="Describe what's included in this skin pack..."
                 />
+              </div>
+
+              {/* Mod File Upload — Direct to R2 */}
+              <div className="mb-6">
+                <label className="block text-sm text-gray-400 mb-2">
+                  Mod File <span className="text-red-400">*</span>
+                </label>
+
+                {modFileUploaded && modFile ? (
+                  <div className="p-4 bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/30 rounded-lg flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Cloud className="w-6 h-6 text-green-400" />
+                      <div>
+                        <div className="text-sm font-medium text-green-300">{modFile.name}</div>
+                        <div className="text-xs text-gray-400">
+                          {formatFileSize(modFile.size)} — Uploaded to R2
+                        </div>
+                      </div>
+                      <CheckCircle2 className="w-5 h-5 text-green-400" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setModFile(null);
+                        setModFileR2Key(null);
+                        setModFilePublicUrl(null);
+                        setModFileUploaded(false);
+                      }}
+                      className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5 text-red-400" />
+                    </button>
+                  </div>
+                ) : modFileUploaded && !modFile && modFilePublicUrl ? (
+                  /* Editing existing pack with existing R2 file */
+                  <div className="p-4 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/30 rounded-lg flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Cloud className="w-6 h-6 text-blue-400" />
+                      <div>
+                        <div className="text-sm font-medium text-blue-300">Existing file on R2</div>
+                        <div className="text-xs text-gray-400 truncate max-w-md">{modFilePublicUrl}</div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('mod-file-upload')?.click()}
+                      className="px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                    >
+                      Replace
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('mod-file-upload')?.click()}
+                    disabled={isUploadingModFile}
+                    className="w-full px-4 py-10 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-3 group disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Cloud className="w-10 h-10 text-gray-400 group-hover:text-orange-400 transition-colors" />
+                    <div className="text-center">
+                      <span className="text-gray-400 group-hover:text-orange-400 transition-colors block">
+                        {isUploadingModFile ? 'Uploading to R2...' : 'Drop your mod file here'}
+                      </span>
+                      <span className="text-xs text-gray-500 mt-1 block">
+                        .zip files up to 500MB — uploads directly to Cloudflare R2
+                      </span>
+                    </div>
+                  </button>
+                )}
+
+                <input
+                  type="file"
+                  id="mod-file-upload"
+                  accept=".zip,.rar,.7z"
+                  onChange={handleModFileSelect}
+                  className="hidden"
+                  disabled={isUploadingModFile}
+                />
+
+                {/* Upload Progress */}
+                {isUploadingModFile && (
+                  <div className="mt-4">
+                    <UploadProgress
+                      fileName={modFile?.name || 'mod-file.zip'}
+                      progress={modFileProgress}
+                      status={modFileProgress >= 100 ? 'processing' : 'uploading'}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Image Upload Section */}
@@ -458,11 +707,6 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      {uploadedImages[index] && (
-                        <div className="absolute bottom-2 left-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                          <CheckCircle2 className="w-4 h-4 text-white" />
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -471,13 +715,12 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                   type="button"
                   onClick={() => document.getElementById('image-upload')?.click()}
                   disabled={isUploadingImages}
-                  className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-6 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ImageIcon className="w-8 h-8 text-gray-400 group-hover:text-orange-400 transition-colors" />
-                  <span className="text-gray-400 group-hover:text-orange-400 transition-colors">
-                    {isUploadingImages ? 'Uploading images...' : 'Click to upload images'}
+                  <ImageIcon className="w-6 h-6 text-gray-400 group-hover:text-orange-400 transition-colors" />
+                  <span className="text-sm text-gray-400 group-hover:text-orange-400 transition-colors">
+                    {isUploadingImages ? 'Uploading...' : 'Upload gallery images'}
                   </span>
-                  <span className="text-xs text-gray-500">Accepts .jpg, .png, .gif</span>
                 </button>
                 <input
                   type="file"
@@ -489,7 +732,6 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                   disabled={isUploadingImages}
                 />
 
-                {/* Image Upload Progress */}
                 {Object.keys(imageUploadProgress).length > 0 && (
                   <div className="mt-4 space-y-2">
                     {Object.entries(imageUploadProgress).map(([key, progress]) => (
@@ -504,123 +746,20 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                 )}
               </div>
 
-              {/* Distribution Section — adapts based on Free vs Paid */}
-              <div className="mb-6">
-                {parseFloat(formData.price) > 0 ? (
-                  /* PAID MOD */
-                  <div className="p-5 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-lg">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                      <span className="text-sm font-medium text-purple-400">Paid Mod — Stripe Checkout</span>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-2">Stripe Payment Link <span className="text-red-400">*</span></label>
-                        <p className="text-xs text-gray-500 mb-2">Create a Payment Link in your Stripe dashboard and paste it here. Customers pay through Stripe.</p>
-                        <input
-                          type="text"
-                          value={formData.stripePaymentLink}
-                          onChange={(e) => setFormData({ ...formData, stripePaymentLink: e.target.value })}
-                          className="w-full px-4 py-3 bg-slate-800 border border-purple-500/30 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
-                          placeholder="https://buy.stripe.com/..."
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-2">Post-Purchase Download URL</label>
-                        <p className="text-xs text-gray-500 mb-2">R2 or external link where buyers get the file after paying.</p>
-                        <input
-                          type="text"
-                          value={formData.downloadUrl}
-                          onChange={(e) => setFormData({ ...formData, downloadUrl: e.target.value })}
-                          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
-                          placeholder="https://pub-4b707c2cf1c14592b9bcf9e26fad42d6.r2.dev/mod-file.zip"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  /* FREE MOD */
-                  <div className="p-5 bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-lg">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                      <span className="text-sm font-medium text-green-400">Free Mod — Direct Download</span>
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Download URL <span className="text-red-400">*</span></label>
-                      <p className="text-xs text-gray-500 mb-2">Paste the R2 public link, Google Drive, or Mega link. Users get this instantly.</p>
-                      <input
-                        type="text"
-                        value={formData.downloadUrl}
-                        onChange={(e) => setFormData({ ...formData, downloadUrl: e.target.value })}
-                        className="w-full px-4 py-3 bg-slate-800 border border-green-500/30 rounded-lg focus:outline-none focus:border-green-500 transition-colors"
-                        placeholder="https://pub-4b707c2cf1c14592b9bcf9e26fad42d6.r2.dev/filename.zip"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* File Upload Section */}
-              <div className="mb-6">
-                <label className="block text-sm text-gray-400 mb-2">Mod File Upload (Optional)</label>
-                <p className="text-xs text-gray-500 mb-3">Upload your mod file directly (max 50MB). For larger files, use the Download URL field instead.</p>
-
-                {uploadedFile && (
-                  <div className="mb-4 p-4 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Package className="w-5 h-5 text-orange-400" />
-                      <div>
-                        <div className="text-sm font-medium">{uploadedFile}</div>
-                        <div className="text-xs text-gray-400">
-                          {formatFileSize(100 * 1024 * 1024)} - Ready
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => { setUploadedFile(null); setUploadedFilePath(null); }}
-                      className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
-                    >
-                      <X className="w-5 h-5 text-red-400" />
-                    </button>
-                  </div>
-                )}
-
-                {!uploadedFile && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => document.getElementById('file-upload')?.click()}
-                      disabled={isUploadingFile}
-                      className="w-full px-4 py-8 border-2 border-dashed border-slate-700 hover:border-orange-500 rounded-lg transition-colors flex flex-col items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Upload className="w-8 h-8 text-gray-400 group-hover:text-orange-400 transition-colors" />
-                      <span className="text-gray-400 group-hover:text-orange-400 transition-colors">
-                        {isUploadingFile ? 'Uploading file...' : 'Click to upload mod file'}
-                      </span>
-                      <span className="text-xs text-gray-500">Accepts .zip files up to 50MB</span>
-                    </button>
-                    <input
-                      type="file"
-                      id="file-upload"
-                      accept="application/zip"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      disabled={isUploadingFile}
-                    />
-                  </>
-                )}
-
-                {/* File Upload Progress */}
-                {isUploadingFile && (
-                  <div className="mt-4">
-                    <UploadProgress
-                      fileName="mod-file.zip"
-                      progress={fileUploadProgress}
-                      status={fileUploadProgress === 100 ? 'processing' : 'uploading'}
-                    />
-                  </div>
-                )}
+              {/* Price indicator */}
+              <div className={`mb-6 p-4 rounded-lg border ${isPaid
+                ? 'bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20'
+                : 'bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${isPaid ? 'bg-purple-400' : 'bg-green-400'}`}></div>
+                  <span className={`text-sm font-medium ${isPaid ? 'text-purple-400' : 'text-green-400'}`}>
+                    {isPaid
+                      ? `Paid Mod — $${formData.price} • Stripe product & payment link will be created automatically`
+                      : 'Free Mod — Users download directly from R2, no payment needed'
+                    }
+                  </span>
+                </div>
               </div>
 
               {/* Featured Checkbox */}
@@ -637,23 +776,33 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                       Add to Hero Slider
                     </div>
                     <div className="text-xs text-gray-400">
-                      Display this skin pack in the full-screen hero carousel on the homepage
+                      Display this skin pack in the homepage carousel
                     </div>
                   </div>
                 </label>
               </div>
 
+              {/* Submit */}
               <div className="flex gap-4">
                 <button
                   type="submit"
-                  className="flex-1 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all"
+                  disabled={isSubmitting || isUploadingModFile}
+                  className="flex-1 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editingSkinPack ? 'Update Skin Pack' : 'Create Skin Pack'}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>{submitStep || 'Processing...'}</span>
+                    </>
+                  ) : (
+                    <span>{editingSkinPack ? 'Update Skin Pack' : 'Create Skin Pack'}</span>
+                  )}
                 </button>
                 <button
                   type="button"
                   onClick={() => handleCloseModal()}
-                  className="px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+                  disabled={isSubmitting}
+                  className="px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
