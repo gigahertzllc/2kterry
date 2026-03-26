@@ -1,0 +1,19 @@
+name = "2kterry-downloads"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# R2 bucket binding
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "2kterry"
+
+# KV namespace for download tokens
+# Create with: wrangler kv:namespace create "DOWNLOAD_TOKENS"
+# Then add the id below
+# [[kv_namespaces]]
+# binding = "DOWNLOAD_TOKENS"
+# id = "YOUR_KV_NAMESPACE_ID"
+
+[vars]
+STRIPE_WEBHOOK_SECRET = ""
+CORS_ORIGIN = "https://2kterrysmods.com"

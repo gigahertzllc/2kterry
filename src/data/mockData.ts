@@ -51,8 +51,10 @@ export const skinPacks: SkinPack[] = [
     downloads: 5120,
     rating: 4.8,
     dateAdded: '2026-03-15',
-    fileSize: '245 MB',
-    featured: true
+    fileSize: '178 MB',
+    featured: true,
+    downloadUrl: 'https://pub-4b707c2cf1c14592b9bcf9e26fad42d6.r2.dev/Chicago%20Bulls-Mar_2026.zip',
+    r2Key: 'Chicago Bulls-Mar_2026.zip'
   },
   {
     id: '3',

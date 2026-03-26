@@ -1,3 +1,7 @@
+// Download Worker URL for paid mod file delivery
+// After deploying the Cloudflare Worker, set VITE_DOWNLOAD_WORKER_URL in your env
+export const DOWNLOAD_WORKER_URL = import.meta.env.VITE_DOWNLOAD_WORKER_URL || '';
+
 // Stripe configuration
 // Users should fill in their publishable key in environment variables or update this config
 export const STRIPE_CONFIG = {

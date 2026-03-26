@@ -533,7 +533,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                           value={formData.downloadUrl}
                           onChange={(e) => setFormData({ ...formData, downloadUrl: e.target.value })}
                           className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
-                          placeholder="https://pub-xxx.r2.dev/mod-file.zip"
+                          placeholder="https://pub-4b707c2cf1c14592b9bcf9e26fad42d6.r2.dev/mod-file.zip"
                         />
                       </div>
                     </div>
@@ -553,7 +553,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                         value={formData.downloadUrl}
                         onChange={(e) => setFormData({ ...formData, downloadUrl: e.target.value })}
                         className="w-full px-4 py-3 bg-slate-800 border border-green-500/30 rounded-lg focus:outline-none focus:border-green-500 transition-colors"
-                        placeholder="https://pub-xxx.r2.dev/bulls-cyberface-pack.zip"
+                        placeholder="https://pub-4b707c2cf1c14592b9bcf9e26fad42d6.r2.dev/filename.zip"
                       />
                     </div>
                   </div>

@@ -1,6 +1,9 @@
 // Storage utilities for R2 and Supabase uploads
 import { publicAnonKey, projectId } from './supabase/info';
 
+// R2 Public bucket URL
+export const R2_PUBLIC_BASE_URL = 'https://pub-4b707c2cf1c14592b9bcf9e26fad42d6.r2.dev';
+
 const API_URL = `https://${projectId}.supabase.co/functions/v1/make-server-832015f7`;
 
 export interface UploadProgressCallback {
