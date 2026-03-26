@@ -14,14 +14,14 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
   // Static hero slides - mascot welcome + free bulls pack
   const heroSlideCount = 2;
 
-  // Auto-advance slides
+  // Auto-advance slides — resets timer on manual changes
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlideCount);
     }, 6000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [currentSlide]); // Reset interval when slide changes
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % heroSlideCount);

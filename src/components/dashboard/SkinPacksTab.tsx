@@ -504,33 +504,61 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                 )}
               </div>
 
-              {/* Download URL Section */}
+              {/* Distribution Section — adapts based on Free vs Paid */}
               <div className="mb-6">
-                <label className="block text-sm text-gray-400 mb-2">Download URL (Optional)</label>
-                <p className="text-xs text-gray-500 mb-2">Provide an external download link (Google Drive, Mega, etc.)</p>
-                <input
-                  type="text"
-                  value={formData.downloadUrl}
-                  onChange={(e) => setFormData({ ...formData, downloadUrl: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors mb-6"
-                  placeholder="https://drive.google.com/file/d/..."
-                />
+                {parseFloat(formData.price) > 0 ? (
+                  /* PAID MOD */
+                  <div className="p-5 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+                      <span className="text-sm font-medium text-purple-400">Paid Mod — Stripe Checkout</span>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Stripe Payment Link <span className="text-red-400">*</span></label>
+                        <p className="text-xs text-gray-500 mb-2">Create a Payment Link in your Stripe dashboard and paste it here. Customers pay through Stripe.</p>
+                        <input
+                          type="text"
+                          value={formData.stripePaymentLink}
+                          onChange={(e) => setFormData({ ...formData, stripePaymentLink: e.target.value })}
+                          className="w-full px-4 py-3 bg-slate-800 border border-purple-500/30 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                          placeholder="https://buy.stripe.com/..."
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Post-Purchase Download URL</label>
+                        <p className="text-xs text-gray-500 mb-2">R2 or external link where buyers get the file after paying.</p>
+                        <input
+                          type="text"
+                          value={formData.downloadUrl}
+                          onChange={(e) => setFormData({ ...formData, downloadUrl: e.target.value })}
+                          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
+                          placeholder="https://pub-xxx.r2.dev/mod-file.zip"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* FREE MOD */
+                  <div className="p-5 bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-lg">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                      <span className="text-sm font-medium text-green-400">Free Mod — Direct Download</span>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-2">Download URL <span className="text-red-400">*</span></label>
+                      <p className="text-xs text-gray-500 mb-2">Paste the R2 public link, Google Drive, or Mega link. Users get this instantly.</p>
+                      <input
+                        type="text"
+                        value={formData.downloadUrl}
+                        onChange={(e) => setFormData({ ...formData, downloadUrl: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-800 border border-green-500/30 rounded-lg focus:outline-none focus:border-green-500 transition-colors"
+                        placeholder="https://pub-xxx.r2.dev/bulls-cyberface-pack.zip"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
-
-              {/* Stripe Payment Link (for paid mods) */}
-              {parseFloat(formData.price) > 0 && (
-                <div className="mb-6 p-4 bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20 rounded-lg">
-                  <label className="block text-sm text-purple-400 mb-2">Stripe Payment Link</label>
-                  <p className="text-xs text-gray-500 mb-2">Create a Payment Link in your Stripe dashboard and paste it here. Customers will be redirected to Stripe to pay.</p>
-                  <input
-                    type="text"
-                    value={formData.stripePaymentLink}
-                    onChange={(e) => setFormData({ ...formData, stripePaymentLink: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-800 border border-purple-500/30 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
-                    placeholder="https://buy.stripe.com/..."
-                  />
-                </div>
-              )}
 
               {/* File Upload Section */}
               <div className="mb-6">
