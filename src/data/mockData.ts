@@ -18,25 +18,6 @@ export const games: Game[] = [
 export const skinPacks: SkinPack[] = [
   {
     id: '1',
-    name: '2K26 Cyberface Pack Vol. 1',
-    description: '18 players and 2 coaches - HD cyberfaces with realistic likeness for NBA 2K26',
-    price: 0,
-    gameId: '1',
-    gameName: 'NBA 2K26',
-    images: [
-      '/images/brand/cyberface-giveaway.jpg',
-      '/images/brand/poster-silhouettes.jpg',
-      '/images/brand/fog-court.jpg'
-    ],
-    thumbnail: '/images/brand/cyberface-giveaway.jpg',
-    downloads: 3250,
-    rating: 4.9,
-    dateAdded: '2026-03-20',
-    fileSize: '156 MB',
-    featured: true
-  },
-  {
-    id: '2',
     name: 'Bulls Complete Cyberface Pack',
     description: 'Full Chicago Bulls roster cyberfaces - FREE giveaway pack with all current players',
     price: 0,
@@ -57,25 +38,7 @@ export const skinPacks: SkinPack[] = [
     r2Key: 'Chicago Bulls-Mar_2026.zip'
   },
   {
-    id: '3',
-    name: 'Court Fog Effect Pack',
-    description: 'Atmospheric fog and lighting effects for your custom courts - adds cinematic feel to gameplay',
-    price: 0,
-    gameId: '1',
-    gameName: 'NBA 2K26',
-    images: [
-      '/images/brand/fog-court.jpg',
-      '/images/brand/poster-silhouettes.jpg',
-      '/images/brand/cyberface-giveaway.jpg'
-    ],
-    thumbnail: '/images/brand/fog-court.jpg',
-    downloads: 2890,
-    rating: 4.7,
-    dateAdded: '2026-03-10',
-    fileSize: '89 MB'
-  },
-  {
-    id: '4',
+    id: '2',
     name: 'Player Silhouette Poster Pack',
     description: 'High-res player silhouette artwork for loading screens and menus - FREE download',
     price: 0,
@@ -90,43 +53,7 @@ export const skinPacks: SkinPack[] = [
     downloads: 4100,
     rating: 4.6,
     dateAdded: '2026-03-05',
-    fileSize: '52 MB'
-  },
-  {
-    id: '5',
-    name: 'All-Star Weekend Jersey Pack',
-    description: 'Complete All-Star Weekend uniforms with warm-up gear and accessories for NBA 2K26',
-    price: 9.99,
-    gameId: '1',
-    gameName: 'NBA 2K26',
-    images: [
-      '/images/brand/mascot-hero.jpg',
-      '/images/brand/cyberface-giveaway.jpg',
-      '/images/brand/fog-court.jpg'
-    ],
-    thumbnail: '/images/brand/mascot-hero.jpg',
-    downloads: 1850,
-    rating: 4.9,
-    dateAdded: '2026-02-28',
-    fileSize: '198 MB',
+    fileSize: '52 MB',
     featured: true
-  },
-  {
-    id: '6',
-    name: 'Classic Courts Collection',
-    description: 'Retro-styled courts from iconic NBA arenas - includes 10 legendary courts',
-    price: 7.99,
-    gameId: '2',
-    gameName: 'NBA 2K25',
-    images: [
-      '/images/brand/mascot-hero-2.jpg',
-      '/images/brand/fog-court.jpg',
-      '/images/brand/poster-silhouettes.jpg'
-    ],
-    thumbnail: '/images/brand/mascot-hero-2.jpg',
-    downloads: 2340,
-    rating: 4.8,
-    dateAdded: '2026-02-20',
-    fileSize: '310 MB'
   }
 ];
