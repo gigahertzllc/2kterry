@@ -189,17 +189,20 @@ export default function App() {
     }
   };
 
-  const selectedSkin = selectedSkinId 
+  // Public-facing packs: only active ones (default to active if field is missing)
+  const activePacks = skinPacks.filter(skin => skin.active !== false);
+
+  const selectedSkin = selectedSkinId
     ? skinPacks.find(skin => skin.id === selectedSkinId)
     : null;
 
-  // Get latest 3 skins sorted by date
-  const latestSkins = [...skinPacks]
+  // Get latest 3 active skins sorted by date
+  const latestSkins = [...activePacks]
     .sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime())
     .slice(0, 3);
 
-  // Get featured skin packs for hero slider
-  const featuredSkins = skinPacks.filter(skin => skin.featured);
+  // Get featured active skin packs for hero slider
+  const featuredSkins = activePacks.filter(skin => skin.featured);
 
   return (
     <div className="min-h-screen">
@@ -215,7 +218,7 @@ export default function App() {
       )}
 
       {currentPage === 'shop' && (
-        <ShopPage games={games} skinPacks={skinPacks} onNavigate={handleNavigate} />
+        <ShopPage games={games} skinPacks={activePacks} onNavigate={handleNavigate} />
       )}
 
       {currentPage === 'skin' && selectedSkin && (

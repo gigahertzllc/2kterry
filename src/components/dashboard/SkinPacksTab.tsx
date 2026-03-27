@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil, CheckCircle2, AlertCircle, Cloud, Loader2 } from 'lucide-react';
+import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil, CheckCircle2, AlertCircle, Cloud, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Game, SkinPack } from '../../types';
 import * as api from '../../utils/api';
 import { toast } from 'sonner';
@@ -278,6 +278,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
         dateAdded: editingSkinPack?.dateAdded || new Date().toISOString().split('T')[0],
         fileSize: `${formData.fileSizeValue} ${formData.fileSizeUnit}`,
         featured: formData.featured,
+        active: editingSkinPack?.active !== false ? true : editingSkinPack.active,
         downloadUrl,
         stripePaymentLink,
         stripeProductId,
@@ -444,6 +445,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Downloads</th>
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Rating</th>
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Date</th>
+                <th className="px-6 py-4 text-left text-sm text-gray-400">Visible</th>
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Actions</th>
               </tr>
             </thead>
@@ -477,6 +479,24 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                   <td className="px-6 py-4">{skin.downloads.toLocaleString()}</td>
                   <td className="px-6 py-4">{skin.rating}</td>
                   <td className="px-6 py-4 text-gray-400">{new Date(skin.dateAdded).toLocaleDateString()}</td>
+                  <td className="px-6 py-4">
+                    <button
+                      onClick={() => {
+                        const updated = { ...skin, active: skin.active === false ? true : false };
+                        const { id, ...rest } = updated;
+                        onUpdateSkinPack(id, rest);
+                        toast.success(updated.active ? `${skin.name} is now visible` : `${skin.name} is now hidden`);
+                      }}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs transition-all ${
+                        skin.active !== false
+                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                          : 'bg-slate-700/50 text-gray-500 border border-slate-600'
+                      }`}
+                    >
+                      {skin.active !== false ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                      {skin.active !== false ? 'Live' : 'Hidden'}
+                    </button>
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
                       <button

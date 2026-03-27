@@ -34,6 +34,7 @@ export const skinPacks: SkinPack[] = [
     dateAdded: '2026-03-15',
     fileSize: '178 MB',
     featured: true,
+    active: true,
     downloadUrl: 'https://pub-4b707c2cf1c14592b9bcf9e26fad42d6.r2.dev/Chicago%20Bulls-Mar_2026.zip',
     r2Key: 'Chicago Bulls-Mar_2026.zip'
   },
@@ -55,6 +56,7 @@ export const skinPacks: SkinPack[] = [
     dateAdded: '2026-03-05',
     fileSize: '964 KB',
     featured: true,
+    active: true,
     downloadUrl: 'https://2kterrysmods.com/images/brand/poster-silhouettes.jpg'
   }
 ];
