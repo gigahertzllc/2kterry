@@ -53,7 +53,8 @@ export const skinPacks: SkinPack[] = [
     downloads: 4100,
     rating: 4.6,
     dateAdded: '2026-03-05',
-    fileSize: '52 MB',
-    featured: true
+    fileSize: '964 KB',
+    featured: true,
+    downloadUrl: 'https://2kterrysmods.com/images/brand/poster-silhouettes.jpg'
   }
 ];
