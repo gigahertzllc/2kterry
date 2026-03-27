@@ -5,13 +5,13 @@ export const games: Game[] = [
     id: '1',
     name: 'NBA 2K26',
     slug: 'nba2k26',
-    image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800'
+    image: '/images/brand/fog-court.jpg'
   },
   {
     id: '2',
     name: 'NBA 2K25',
     slug: 'nba2k25',
-    image: 'https://images.unsplash.com/photo-1504450758481-7338bbe75005?w=800'
+    image: '/images/brand/poster-silhouettes.jpg'
   }
 ];
 

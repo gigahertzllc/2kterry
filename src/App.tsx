@@ -305,21 +305,18 @@ export default function App() {
             </div>
 
             <div>
-              <h4 className="mb-4 text-sm">Support</h4>
+              <h4 className="mb-4 text-sm">Connect</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-orange-400 transition-colors">Installation Guide</a></li>
-                <li><a href="#" className="hover:text-orange-400 transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-orange-400 transition-colors">Discord</a></li>
-                <li><a href="#" className="hover:text-orange-400 transition-colors">Facebook</a></li>
+                <li><a href="https://buymeacoffee.com/2kterrysmods" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">Support Us</a></li>
+                <li><span className="text-gray-500">Discord — Coming Soon</span></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="mb-4 text-sm">Legal</h4>
+              <h4 className="mb-4 text-sm">Info</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-orange-400 transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-orange-400 transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-orange-400 transition-colors">Refund Policy</a></li>
+                <li><a href="mailto:team@gigahertzcompany.com" className="hover:text-orange-400 transition-colors">Contact</a></li>
+                <li><span className="text-gray-500">All sales are final. No refunds.</span></li>
               </ul>
             </div>
           </div>

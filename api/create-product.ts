@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 
-const ADMIN_SECRET = process.env.ADMIN_API_SECRET || 'TerryMods2025!';
+const ADMIN_SECRET = process.env.ADMIN_API_SECRET || '';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {

@@ -164,10 +164,6 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
                   )}
                 </button>
 
-                <button className="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-lg transition-all flex items-center justify-center gap-3">
-                  <Download className="w-5 h-5" />
-                  <span>Download Preview</span>
-                </button>
               </div>
 
               <div className="p-6 bg-slate-900 rounded-2xl border border-slate-800">

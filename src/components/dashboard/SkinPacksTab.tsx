@@ -7,7 +7,7 @@ import { UploadProgress } from '../ui/UploadProgress';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
 import { uploadFileWithProgress, validateFile, formatFileSize } from '../../utils/storage';
 
-const ADMIN_SECRET = 'TerryMods2025!';
+const ADMIN_SECRET = import.meta.env.VITE_ADMIN_API_SECRET || '';
 
 interface SkinPacksTabProps {
   games: Game[];

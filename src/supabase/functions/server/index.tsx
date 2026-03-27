@@ -599,7 +599,7 @@ app.get("/make-server-832015f7/skin-packs", async (c) => {
           
           // Get the game to use its image as fallback
           const game = await kv.get(`game:${pack.gameId}`);
-          const fallbackImage = game?.image || 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=800';
+          const fallbackImage = game?.image || '/images/brand/fog-court.jpg';
           
           // Replace broken images with fallback
           const fixedPack = {

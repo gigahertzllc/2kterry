@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-const ADMIN_SECRET = process.env.ADMIN_API_SECRET || 'TerryMods2025!';
+const ADMIN_SECRET = process.env.ADMIN_API_SECRET || '';
 
 function getS3Client() {
   return new S3Client({
