@@ -191,7 +191,7 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
                     </div>
                   </div>
                   <div className="text-xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">
-                    ${skin.price}
+                    {skin.price === 0 ? 'FREE' : `$${skin.price}`}
                   </div>
                 </div>
               </div>

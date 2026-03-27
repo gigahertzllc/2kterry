@@ -181,7 +181,7 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
                 {/* Price Bar */}
                 <div className="flex items-center justify-between pt-4 border-t border-slate-800/50">
                   <div className="text-2xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">
-                    ${skin.price}
+                    {skin.price === 0 ? 'FREE' : `$${skin.price}`}
                   </div>
                   <div className="px-4 py-2 bg-gradient-to-r from-orange-500/10 to-orange-500/10 border border-orange-500/20 rounded-lg text-sm text-orange-400 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition-all">
                     View Details
