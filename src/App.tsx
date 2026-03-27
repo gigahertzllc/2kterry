@@ -23,7 +23,7 @@ export default function App() {
   const [adminSession, setAdminSession] = useState<any>(null);
   const [adminData, setAdminData] = useState<any>(null);
 
-  // Initialize and load data - always use mock data as base, merge Supabase admin-created products
+  // Initialize and load data from Supabase database (DB-driven approach)
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
@@ -38,20 +38,46 @@ export default function App() {
         // Initialize database with default games
         await api.initializeDatabase();
 
-        // Load any admin-created skin packs from Supabase
+        // Load skin packs from Supabase — this is the single source of truth
         const skinPacksData = await api.getSkinPacks();
+        let dbPacks = skinPacksData.skinPacks || [];
 
-        // Always start with our default mock data as the base
-        // Then add any Supabase products that aren't already in the defaults (admin-created ones)
-        const defaultIds = new Set(defaultSkinPacks.map(s => s.id));
-        const adminCreatedPacks = (skinPacksData.skinPacks || []).filter(
-          (s: SkinPack) => !defaultIds.has(s.id)
-        );
+        // One-time cleanup: remove known stale dummy packs from old sync
+        // These are the old fake packs that were previously hardcoded and pushed to DB
+        const staleNames = new Set([
+          'HD Cyberface Pack Vol. 1',
+          'Classic Jerseys Collection',
+          'Ultimate Court Pack',
+          'Next-Gen Body Model Pack',
+          'HD Cyberface Pack Vol. 2',
+          'Retro Jerseys Pack'
+        ]);
+        const stalePacks = dbPacks.filter((p: SkinPack) => staleNames.has(p.name));
+        if (stalePacks.length > 0) {
+          console.log(`Cleaning up ${stalePacks.length} stale packs from database...`);
+          for (const stale of stalePacks) {
+            try { await api.deleteSkinPack(stale.id); } catch (e) { /* ignore */ }
+          }
+          // Re-fetch after cleanup
+          const refreshed = await api.getSkinPacks();
+          dbPacks = refreshed.skinPacks || [];
+        }
 
-        setGames(defaultGames);
-        setSkinPacks([...defaultSkinPacks, ...adminCreatedPacks]);
-
-        console.log(`Loaded ${defaultSkinPacks.length} default + ${adminCreatedPacks.length} admin-created skin packs`);
+        // If DB has packs, use them exclusively
+        if (dbPacks.length > 0) {
+          setGames(defaultGames);
+          setSkinPacks(dbPacks);
+          console.log(`Loaded ${dbPacks.length} skin packs from database`);
+        } else {
+          // DB is empty — seed it with the default packs, then use those
+          console.log('Database empty, seeding with default packs...');
+          for (const pack of defaultSkinPacks) {
+            try { await api.createSkinPack(pack); } catch (e) { /* ignore dupes */ }
+          }
+          setGames(defaultGames);
+          setSkinPacks(defaultSkinPacks);
+          console.log(`Seeded ${defaultSkinPacks.length} default packs to database`);
+        }
       } catch (error) {
         console.error('Error loading data, using defaults:', error);
         setGames(defaultGames);
@@ -111,20 +137,15 @@ export default function App() {
     setShowAdminLogin(false);
     setCurrentPage('dashboard');
 
-    // Sync: clear old Supabase data and push correct defaults
+    // On admin login, reload packs from DB to ensure fresh state
     try {
       const { skinPacks: remotePacks } = await api.getSkinPacks();
-      // Delete all existing remote packs
-      for (const pack of remotePacks) {
-        try { await api.deleteSkinPack(pack.id); } catch (e) { /* ignore */ }
+      if (remotePacks.length > 0) {
+        setSkinPacks(remotePacks);
+        console.log(`Admin login: loaded ${remotePacks.length} packs from DB`);
       }
-      // Push current defaults to Supabase
-      for (const pack of defaultSkinPacks) {
-        try { await api.createSkinPack(pack); } catch (e) { /* ignore */ }
-      }
-      console.log('Synced default products to Supabase');
     } catch (e) {
-      console.log('Could not sync to Supabase (offline mode)');
+      console.log('Could not refresh packs from Supabase');
     }
   };
 
