@@ -23,7 +23,8 @@ export default function App() {
   const [adminSession, setAdminSession] = useState<any>(null);
   const [adminData, setAdminData] = useState<any>(null);
 
-  // Initialize and load data from Supabase database (DB-driven approach)
+  // Load data: defaults are always authoritative for known packs,
+  // DB adds any admin-created packs on top
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
@@ -38,57 +39,45 @@ export default function App() {
         // Initialize database with default games
         await api.initializeDatabase();
 
-        // Load skin packs from Supabase — this is the single source of truth
-        const skinPacksData = await api.getSkinPacks();
-        let dbPacks = skinPacksData.skinPacks || [];
+        // Default packs are ALWAYS the base — they have correct images/thumbnails
+        const allPacks = [...defaultSkinPacks];
 
-        // One-time cleanup: remove stale dummy packs from old sync
-        // These are the actual old pack names that were previously hardcoded
-        const realPackNames = new Set(defaultSkinPacks.map(p => p.name));
-        const stalePacks = dbPacks.filter((p: SkinPack) => !realPackNames.has(p.name));
-        if (stalePacks.length > 0) {
-          console.log(`Cleaning up ${stalePacks.length} stale packs from database:`, stalePacks.map((p: SkinPack) => p.name));
+        // Load admin-created packs from Supabase (anything not matching a default)
+        try {
+          const skinPacksData = await api.getSkinPacks();
+          const dbPacks = skinPacksData.skinPacks || [];
+          const defaultNames = new Set(defaultSkinPacks.map(p => p.name));
+
+          // Only keep DB packs that are admin-created (not matching any default)
+          const adminCreatedPacks = dbPacks.filter(
+            (p: SkinPack) => !defaultNames.has(p.name)
+          );
+
+          if (adminCreatedPacks.length > 0) {
+            allPacks.push(...adminCreatedPacks);
+            console.log(`Loaded ${adminCreatedPacks.length} admin-created packs from database`);
+          }
+
+          // Clean up stale packs from DB (old defaults that no longer exist)
+          // Keep admin-created packs that have images (they were added intentionally)
+          const stalePacks = dbPacks.filter((p: SkinPack) => {
+            if (defaultNames.has(p.name)) return false; // matches a current default, keep
+            if (p.thumbnail && p.images?.length > 0) return false; // has images, probably admin-created, keep
+            return true; // stale: doesn't match defaults and has no images
+          });
           for (const stale of stalePacks) {
             try { await api.deleteSkinPack(stale.id); } catch (e) { /* ignore */ }
           }
-          // Re-fetch after cleanup
-          const refreshed = await api.getSkinPacks();
-          dbPacks = refreshed.skinPacks || [];
+          if (stalePacks.length > 0) {
+            console.log(`Cleaned up ${stalePacks.length} stale packs from database`);
+          }
+        } catch (dbError) {
+          console.log('Could not load from Supabase, using defaults only');
         }
 
-        // Build a lookup of default packs by name for merging
-        const defaultsByName = new Map(defaultSkinPacks.map(p => [p.name, p]));
-
-        // Ensure DB packs have all required fields (images, thumbnail, etc.)
-        // Supabase may return data with missing or transformed fields
-        const enrichedPacks = dbPacks.map((dbPack: SkinPack) => {
-          const defaultMatch = defaultsByName.get(dbPack.name);
-          if (defaultMatch) {
-            // For known default packs, merge DB data with defaults to fill gaps
-            return {
-              ...defaultMatch,        // base: all default fields (images, thumbnail, etc.)
-              ...dbPack,              // override with DB values
-              images: dbPack.images?.length ? dbPack.images : defaultMatch.images,
-              thumbnail: dbPack.thumbnail || defaultMatch.thumbnail,
-            };
-          }
-          return dbPack; // admin-created packs pass through as-is
-        });
-
-        if (enrichedPacks.length > 0) {
-          setGames(defaultGames);
-          setSkinPacks(enrichedPacks);
-          console.log(`Loaded ${enrichedPacks.length} skin packs from database`);
-        } else {
-          // DB is empty — seed it with the default packs, then use those
-          console.log('Database empty, seeding with default packs...');
-          for (const pack of defaultSkinPacks) {
-            try { await api.createSkinPack(pack); } catch (e) { /* ignore dupes */ }
-          }
-          setGames(defaultGames);
-          setSkinPacks(defaultSkinPacks);
-          console.log(`Seeded ${defaultSkinPacks.length} default packs to database`);
-        }
+        setGames(defaultGames);
+        setSkinPacks(allPacks);
+        console.log(`Showing ${allPacks.length} total packs`);
       } catch (error) {
         console.error('Error loading data, using defaults:', error);
         setGames(defaultGames);
