@@ -42,19 +42,12 @@ export default function App() {
         const skinPacksData = await api.getSkinPacks();
         let dbPacks = skinPacksData.skinPacks || [];
 
-        // One-time cleanup: remove known stale dummy packs from old sync
-        // These are the old fake packs that were previously hardcoded and pushed to DB
-        const staleNames = new Set([
-          'HD Cyberface Pack Vol. 1',
-          'Classic Jerseys Collection',
-          'Ultimate Court Pack',
-          'Next-Gen Body Model Pack',
-          'HD Cyberface Pack Vol. 2',
-          'Retro Jerseys Pack'
-        ]);
-        const stalePacks = dbPacks.filter((p: SkinPack) => staleNames.has(p.name));
+        // One-time cleanup: remove stale dummy packs from old sync
+        // These are the actual old pack names that were previously hardcoded
+        const realPackNames = new Set(defaultSkinPacks.map(p => p.name));
+        const stalePacks = dbPacks.filter((p: SkinPack) => !realPackNames.has(p.name));
         if (stalePacks.length > 0) {
-          console.log(`Cleaning up ${stalePacks.length} stale packs from database...`);
+          console.log(`Cleaning up ${stalePacks.length} stale packs from database:`, stalePacks.map((p: SkinPack) => p.name));
           for (const stale of stalePacks) {
             try { await api.deleteSkinPack(stale.id); } catch (e) { /* ignore */ }
           }
@@ -63,11 +56,29 @@ export default function App() {
           dbPacks = refreshed.skinPacks || [];
         }
 
-        // If DB has packs, use them exclusively
-        if (dbPacks.length > 0) {
+        // Build a lookup of default packs by name for merging
+        const defaultsByName = new Map(defaultSkinPacks.map(p => [p.name, p]));
+
+        // Ensure DB packs have all required fields (images, thumbnail, etc.)
+        // Supabase may return data with missing or transformed fields
+        const enrichedPacks = dbPacks.map((dbPack: SkinPack) => {
+          const defaultMatch = defaultsByName.get(dbPack.name);
+          if (defaultMatch) {
+            // For known default packs, merge DB data with defaults to fill gaps
+            return {
+              ...defaultMatch,        // base: all default fields (images, thumbnail, etc.)
+              ...dbPack,              // override with DB values
+              images: dbPack.images?.length ? dbPack.images : defaultMatch.images,
+              thumbnail: dbPack.thumbnail || defaultMatch.thumbnail,
+            };
+          }
+          return dbPack; // admin-created packs pass through as-is
+        });
+
+        if (enrichedPacks.length > 0) {
           setGames(defaultGames);
-          setSkinPacks(dbPacks);
-          console.log(`Loaded ${dbPacks.length} skin packs from database`);
+          setSkinPacks(enrichedPacks);
+          console.log(`Loaded ${enrichedPacks.length} skin packs from database`);
         } else {
           // DB is empty — seed it with the default packs, then use those
           console.log('Database empty, seeding with default packs...');
