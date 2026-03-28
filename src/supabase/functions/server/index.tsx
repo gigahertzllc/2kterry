@@ -847,16 +847,140 @@ app.get("/make-server-832015f7/download/:id", async (c) => {
   try {
     const id = c.req.param('id');
     const skinPack = await kv.get(`skinpack:${id}`);
-    
+
     if (!skinPack || !skinPack.filePath) {
       return c.json({ error: 'Skin pack file not found' }, 404);
     }
-    
+
     const signedUrl = await getSignedUrl(BUCKET_NAME, skinPack.filePath, 300); // 5 min expiry
     return c.json({ url: signedUrl });
   } catch (error) {
     console.error('Error getting download URL:', error);
     return c.json({ error: 'Failed to get download URL' }, 500);
+  }
+});
+
+// Testimonials endpoints
+
+// Get all testimonials (with optional approved filter)
+app.get("/make-server-832015f7/testimonials", async (c) => {
+  try {
+    const approvedFilter = c.req.query('approved');
+    const testimonials = await kv.getByPrefix('testimonial:');
+
+    let filtered = testimonials;
+    if (approvedFilter === 'true') {
+      filtered = testimonials.filter((t: any) => t.approved === true);
+    }
+
+    // Sort by createdAt descending
+    const sorted = filtered.sort((a: any, b: any) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    return c.json({ testimonials: sorted });
+  } catch (error) {
+    console.error('Error fetching testimonials:', error);
+    return c.json({ error: 'Failed to fetch testimonials' }, 500);
+  }
+});
+
+// Create a new testimonial
+app.post("/make-server-832015f7/testimonials", async (c) => {
+  try {
+    const { customerName, gamertag, content, rating, avatar, featured, approved } = await c.req.json();
+
+    if (!customerName || !content || !rating) {
+      return c.json({ error: 'customerName, content, and rating are required' }, 400);
+    }
+
+    const id = crypto.randomUUID();
+    const testimonial = {
+      id,
+      customerName,
+      gamertag: gamertag || null,
+      content,
+      rating,
+      avatar: avatar || null,
+      featured: featured || false,
+      approved: approved !== undefined ? approved : true,
+      createdAt: new Date().toISOString()
+    };
+
+    await kv.set(`testimonial:${id}`, testimonial);
+
+    return c.json({ testimonial });
+  } catch (error) {
+    console.error('Error creating testimonial:', error);
+    return c.json({ error: 'Failed to create testimonial' }, 500);
+  }
+});
+
+// Update a testimonial
+app.put("/make-server-832015f7/testimonials/:id", async (c) => {
+  try {
+    const id = c.req.param('id');
+    const updates = await c.req.json();
+
+    const testimonial = await kv.get(`testimonial:${id}`);
+    if (!testimonial) {
+      return c.json({ error: 'Testimonial not found' }, 404);
+    }
+
+    const updated = {
+      ...testimonial,
+      ...updates,
+      id: testimonial.id,
+      createdAt: testimonial.createdAt
+    };
+
+    await kv.set(`testimonial:${id}`, updated);
+
+    return c.json({ testimonial: updated });
+  } catch (error) {
+    console.error('Error updating testimonial:', error);
+    return c.json({ error: 'Failed to update testimonial' }, 500);
+  }
+});
+
+// Delete a testimonial
+app.delete("/make-server-832015f7/testimonials/:id", async (c) => {
+  try {
+    const id = c.req.param('id');
+
+    const testimonial = await kv.get(`testimonial:${id}`);
+    if (!testimonial) {
+      return c.json({ error: 'Testimonial not found' }, 404);
+    }
+
+    await kv.del(`testimonial:${id}`);
+
+    return c.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting testimonial:', error);
+    return c.json({ error: 'Failed to delete testimonial' }, 500);
+  }
+});
+
+// Increment download count for a skin pack
+app.post("/make-server-832015f7/skin-packs/:id/download", async (c) => {
+  try {
+    const id = c.req.param('id');
+    const skinPack = await kv.get(`skinpack:${id}`);
+
+    if (!skinPack) {
+      return c.json({ error: 'Skin pack not found' }, 404);
+    }
+
+    const newCount = (skinPack.downloads || 0) + 1;
+    skinPack.downloads = newCount;
+
+    await kv.set(`skinpack:${id}`, skinPack);
+
+    return c.json({ downloads: newCount });
+  } catch (error) {
+    console.error('Error incrementing download count:', error);
+    return c.json({ error: 'Failed to increment download count' }, 500);
   }
 });
 

@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Package, Users, ShoppingCart, Settings as SettingsIcon } from 'lucide-react';
+import { Package, Users, ShoppingCart, Settings as SettingsIcon, MessageSquare } from 'lucide-react';
 import { Game, SkinPack } from '../types';
 import { SkinPacksTab } from './dashboard/SkinPacksTab';
 import { CustomersTab } from './dashboard/CustomersTab';
 import { OrdersTab } from './dashboard/OrdersTab';
 import { SettingsTab } from './dashboard/SettingsTab';
+import { TestimonialsTab } from './dashboard/TestimonialsTab';
 
 interface DashboardPageProps {
   games: Game[];
@@ -14,7 +15,7 @@ interface DashboardPageProps {
   onDeleteSkinPack: (id: string) => void;
 }
 
-type TabType = 'skinpacks' | 'customers' | 'orders' | 'settings';
+type TabType = 'skinpacks' | 'customers' | 'orders' | 'testimonials' | 'settings';
 
 export function DashboardPage({ games, skinPacks, onAddSkinPack, onUpdateSkinPack, onDeleteSkinPack }: DashboardPageProps) {
   const [activeTab, setActiveTab] = useState<TabType>('skinpacks');
@@ -23,6 +24,7 @@ export function DashboardPage({ games, skinPacks, onAddSkinPack, onUpdateSkinPac
     { id: 'skinpacks' as TabType, label: 'Skin Packs', icon: Package },
     { id: 'customers' as TabType, label: 'Customers', icon: Users },
     { id: 'orders' as TabType, label: 'Orders', icon: ShoppingCart },
+    { id: 'testimonials' as TabType, label: 'Testimonials', icon: MessageSquare },
     { id: 'settings' as TabType, label: 'Settings', icon: SettingsIcon },
   ];
 
@@ -76,7 +78,9 @@ export function DashboardPage({ games, skinPacks, onAddSkinPack, onUpdateSkinPac
         {activeTab === 'customers' && <CustomersTab />}
         
         {activeTab === 'orders' && <OrdersTab skinPacks={skinPacks} />}
-        
+
+        {activeTab === 'testimonials' && <TestimonialsTab />}
+
         {activeTab === 'settings' && <SettingsTab />}
       </div>
     </div>

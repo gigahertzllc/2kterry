@@ -28,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { name, description, price, imageUrl, downloadUrl, r2Key } = req.body;
+    const { name, description, price, imageUrl, downloadUrl, r2Key, skinPackId } = req.body;
 
     if (!name || !price || price <= 0) {
       return res.status(400).json({ error: 'Name and price (> 0) are required' });
@@ -44,6 +44,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       metadata: {
         r2_key: r2Key || '',
         download_url: downloadUrl || '',
+        skin_pack_id: skinPackId || '',
+        skin_pack_name: name,
         source: '2kterrysmods-admin',
       },
     });
@@ -73,6 +75,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         r2_key: r2Key || '',
         download_url: downloadUrl || '',
         product_name: name,
+        skin_pack_id: skinPackId || '',
+        skin_pack_name: name,
       },
     });
 

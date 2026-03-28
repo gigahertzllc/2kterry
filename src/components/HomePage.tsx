@@ -1,14 +1,16 @@
-import { SkinPack } from '../types';
+import { SkinPack, Testimonial } from '../types';
 import { useState, useEffect } from 'react';
 import { Download, Star, ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { TestimonialsSlider } from './TestimonialsSlider';
 
 interface HomePageProps {
   latestSkins: SkinPack[];
   featuredSkins: SkinPack[];
+  testimonials: Testimonial[];
   onNavigate: (page: string, skinId?: string) => void;
 }
 
-export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePageProps) {
+export function HomePage({ latestSkins, featuredSkins, testimonials, onNavigate }: HomePageProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Slides: static welcome slide + one slide per featured pack
@@ -210,6 +212,9 @@ export function HomePage({ latestSkins, featuredSkins, onNavigate }: HomePagePro
           ))}
         </div>
       </div>
+
+      {/* Testimonials Section */}
+      <TestimonialsSlider testimonials={testimonials} />
 
       {/* Features Section */}
       <div className="bg-gradient-to-b from-orange-500/10 to-transparent py-20">

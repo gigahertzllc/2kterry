@@ -8,9 +8,10 @@ import { AdminLogin } from './components/AdminLogin';
 import { CheckoutSuccess } from './components/CheckoutSuccess';
 import { InstallGuidePage } from './components/InstallGuidePage';
 import { games as defaultGames, skinPacks as seedSkinPacks } from './data/mockData';
-import { SkinPack } from './types';
+import { SkinPack, Testimonial } from './types';
 import { useEffect } from 'react';
 import * as api from './utils/api';
+import { defaultTestimonials } from './data/testimonials';
 import { toast, Toaster } from 'sonner';
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [adminSession, setAdminSession] = useState<any>(null);
   const [adminData, setAdminData] = useState<any>(null);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
   // Load packs from Supabase — the ONLY source of truth.
   // Seed data is only used once if the DB has never been populated.
@@ -67,6 +69,23 @@ export default function App() {
         setGames(defaultGames);
         setSkinPacks(allPacks);
         console.log(`Showing ${allPacks.length} total packs`);
+
+        // Load testimonials — seed defaults if empty
+        try {
+          const { testimonials: dbTestimonials } = await api.getApprovedTestimonials();
+          if (dbTestimonials.length > 0) {
+            setTestimonials(dbTestimonials);
+          } else {
+            // Seed default testimonials on first run
+            for (const t of defaultTestimonials) {
+              try { await api.createTestimonial(t); } catch (e) { /* ignore */ }
+            }
+            setTestimonials(defaultTestimonials.map((t, i) => ({ ...t, id: `seed-${i}` })));
+          }
+        } catch (e) {
+          console.error('Error loading testimonials:', e);
+          setTestimonials(defaultTestimonials.map((t, i) => ({ ...t, id: `seed-${i}` })));
+        }
       } catch (error) {
         console.error('Error loading data:', error);
         setGames(defaultGames);
@@ -201,7 +220,7 @@ export default function App() {
       />
 
       {currentPage === 'home' && (
-        <HomePage latestSkins={latestSkins} featuredSkins={featuredSkins} onNavigate={handleNavigate} />
+        <HomePage latestSkins={latestSkins} featuredSkins={featuredSkins} testimonials={testimonials} onNavigate={handleNavigate} />
       )}
 
       {currentPage === 'shop' && (

@@ -76,6 +76,7 @@ async function createStripeProduct(data: {
   imageUrl?: string;
   downloadUrl?: string;
   r2Key?: string;
+  skinPackId?: string;
 }): Promise<{ stripePaymentLink: string; stripeProductId: string; stripePriceId: string }> {
   const response = await fetch('/api/create-product', {
     method: 'POST',
@@ -250,6 +251,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
             imageUrl: imagesToStore[0] || undefined,
             downloadUrl,
             r2Key: modFileR2Key || undefined,
+            skinPackId: editingSkinPack?.id || Date.now().toString(),
           });
 
           stripePaymentLink = stripeResult.stripePaymentLink;

@@ -1,5 +1,5 @@
 import { projectId, publicAnonKey } from './supabase/info';
-import { Game, SkinPack } from '../types';
+import { Game, SkinPack, Testimonial } from '../types';
 
 const API_URL = `https://${projectId}.supabase.co/functions/v1/make-server-832015f7`;
 
@@ -469,4 +469,75 @@ export async function createCheckoutSession(params: {
 
   const data = await response.json();
   return { sessionId: data.sessionId, clientSecret: data.clientSecret };
+}
+
+// Testimonials API
+export async function getTestimonials(): Promise<{ testimonials: Testimonial[] }> {
+  try {
+    const response = await fetch(`${API_URL}/testimonials`, { headers });
+    const data = await response.json();
+    return { testimonials: data.testimonials || [] };
+  } catch (error) {
+    console.error('Error fetching testimonials:', error);
+    return { testimonials: [] };
+  }
+}
+
+export async function getApprovedTestimonials(): Promise<{ testimonials: Testimonial[] }> {
+  try {
+    const response = await fetch(`${API_URL}/testimonials?approved=true`, { headers });
+    const data = await response.json();
+    return { testimonials: data.testimonials || [] };
+  } catch (error) {
+    console.error('Error fetching approved testimonials:', error);
+    return { testimonials: [] };
+  }
+}
+
+export async function createTestimonial(
+  testimonial: Omit<Testimonial, 'id'>
+): Promise<any> {
+  const response = await fetch(`${API_URL}/testimonials`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(testimonial),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to create testimonial');
+  }
+
+  const data = await response.json();
+  return data;
+}
+
+export async function updateTestimonial(
+  id: string,
+  data: Partial<Testimonial>
+): Promise<any> {
+  const response = await fetch(`${API_URL}/testimonials/${id}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to update testimonial');
+  }
+
+  return await response.json();
+}
+
+export async function deleteTestimonial(id: string): Promise<void> {
+  const response = await fetch(`${API_URL}/testimonials/${id}`, {
+    method: 'DELETE',
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to delete testimonial');
+  }
 }

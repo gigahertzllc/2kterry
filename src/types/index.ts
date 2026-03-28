@@ -26,3 +26,15 @@ export interface SkinPack {
   stripePriceId?: string;
   r2Key?: string;
 }
+
+export interface Testimonial {
+  id: string;
+  customerName: string;
+  gamertag?: string;
+  content: string;
+  rating: number;
+  avatar?: string;
+  featured?: boolean;
+  approved?: boolean;
+  createdAt: string;
+}
