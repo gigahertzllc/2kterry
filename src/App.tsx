@@ -36,67 +36,59 @@ export default function App() {
     'Historic Teams Roster Pack',
   ]);
 
-  // Shared function: load packs with defaults as authoritative base,
-  // merge DB-only fields (like active/visibility), add admin-created packs
+  // Shared function: load packs from Supabase (source of truth),
+  // fall back to hardcoded defaults only if DB is empty or unreachable
   async function loadMergedPacks(): Promise<SkinPack[]> {
-    // Default packs are ALWAYS the base — correct images/thumbnails guaranteed
     const defaultById = new Map(defaultSkinPacks.map(p => [p.id, p]));
     const defaultByName = new Map(defaultSkinPacks.map(p => [p.name, p]));
-    const allPacks: SkinPack[] = [...defaultSkinPacks];
 
     try {
       const skinPacksData = await api.getSkinPacks();
-      const dbPacks = skinPacksData.skinPacks || [];
+      const dbPacks = (skinPacksData.skinPacks || []) as SkinPack[];
 
+      // Clean known dummy/test packs
+      const cleanPacks: SkinPack[] = [];
       for (const dbPack of dbPacks) {
-        // Check if this is a known dummy/test pack — delete it
         if (KNOWN_DUMMY_NAMES.has(dbPack.name)) {
           try { await api.deleteSkinPack(dbPack.id); } catch (e) { /* ignore */ }
           console.log(`Deleted dummy pack from DB: ${dbPack.name}`);
           continue;
         }
+        cleanPacks.push(dbPack);
+      }
 
-        // Check if this DB pack matches a default (by id or name)
-        const matchById = defaultById.get(dbPack.id);
-        const matchByName = defaultByName.get(dbPack.name);
-        const defaultMatch = matchById || matchByName;
-
-        if (defaultMatch) {
-          // Merge DB-only fields (active, downloads, etc.) into the default
-          // but KEEP default images/thumbnail — they're the correct local paths
-          const idx = allPacks.findIndex(p => p.id === defaultMatch.id);
-          if (idx !== -1) {
-            allPacks[idx] = {
-              ...defaultMatch,              // base: correct images, thumbnail, etc.
-              active: dbPack.active,         // from DB: visibility toggle state
-              downloads: dbPack.downloads ?? defaultMatch.downloads,
-              rating: dbPack.rating ?? defaultMatch.rating,
-            };
+      // If DB has packs, use them — DB is the source of truth
+      // Admin edits (new images, reordering, visibility) are all saved there
+      if (cleanPacks.length > 0) {
+        // Check if any defaults are missing from DB and sync them
+        for (const defaultPack of defaultSkinPacks) {
+          const existsInDb = cleanPacks.some(
+            (p: SkinPack) => p.id === defaultPack.id || p.name === defaultPack.name
+          );
+          if (!existsInDb) {
+            try {
+              await api.createSkinPack(defaultPack);
+              cleanPacks.push(defaultPack);
+              console.log(`Synced default pack to DB: ${defaultPack.name}`);
+            } catch (e) { /* ignore duplicates */ }
           }
-        } else {
-          // Admin-created pack — use DB data as-is
-          allPacks.push(dbPack);
-          console.log(`Loaded admin-created pack: ${dbPack.name}`);
         }
+        console.log(`Loaded ${cleanPacks.length} packs from database`);
+        return cleanPacks;
       }
 
-      // Sync defaults TO Supabase so admin operations (visibility toggle, etc.) persist
+      // DB is empty — seed it with defaults
+      console.log('Database empty, seeding with default packs');
       for (const defaultPack of defaultSkinPacks) {
-        const existsInDb = dbPacks.some(
-          (p: SkinPack) => p.id === defaultPack.id || p.name === defaultPack.name
-        );
-        if (!existsInDb) {
-          try {
-            await api.createSkinPack(defaultPack);
-            console.log(`Synced default pack to DB: ${defaultPack.name}`);
-          } catch (e) { /* ignore duplicates */ }
-        }
+        try {
+          await api.createSkinPack(defaultPack);
+        } catch (e) { /* ignore */ }
       }
+      return [...defaultSkinPacks];
     } catch (dbError) {
-      console.log('Could not load from Supabase, using defaults only');
+      console.log('Could not reach Supabase, using defaults only');
+      return [...defaultSkinPacks];
     }
-
-    return allPacks;
   }
 
   // Load data on mount

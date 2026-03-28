@@ -672,15 +672,15 @@ app.get("/make-server-832015f7/skin-packs/:id", async (c) => {
     
     // Get PUBLIC URLs for images (no expiration)
     const imagesWithUrls = skinPack.images.map((imagePath: string) => {
-      // Skip if it's already a full URL (http, https, or blob)
-      if (imagePath.startsWith('http') || imagePath.startsWith('blob:')) {
+      // Skip full URLs, blob URLs, and local web paths (start with /)
+      if (imagePath.startsWith('http') || imagePath.startsWith('blob:') || imagePath.startsWith('/')) {
         return imagePath;
       }
       return getPublicUrl(IMAGES_BUCKET_NAME, imagePath);
     });
-    
+
     let thumbnailUrl = skinPack.thumbnail;
-    if (!skinPack.thumbnail.startsWith('http') && !skinPack.thumbnail.startsWith('blob:')) {
+    if (!skinPack.thumbnail.startsWith('http') && !skinPack.thumbnail.startsWith('blob:') && !skinPack.thumbnail.startsWith('/')) {
       thumbnailUrl = getPublicUrl(IMAGES_BUCKET_NAME, skinPack.thumbnail);
     }
     

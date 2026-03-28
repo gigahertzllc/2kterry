@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil, CheckCircle2, AlertCircle, Cloud, Loader2, Eye, EyeOff } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil, CheckCircle2, AlertCircle, Cloud, Loader2, Eye, EyeOff, GripVertical } from 'lucide-react';
 import { Game, SkinPack } from '../../types';
 import * as api from '../../utils/api';
 import { toast } from 'sonner';
@@ -349,6 +349,43 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
   const handleRemoveImage = (index: number) => {
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
     setUploadedImagePaths(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Drag-to-reorder state
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
+
+  const handleDragStart = (index: number) => {
+    dragItem.current = index;
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    dragOverItem.current = index;
+  };
+
+  const handleDrop = () => {
+    if (dragItem.current === null || dragOverItem.current === null) return;
+    if (dragItem.current === dragOverItem.current) return;
+
+    const from = dragItem.current;
+    const to = dragOverItem.current;
+
+    setUploadedImages(prev => {
+      const copy = [...prev];
+      const [removed] = copy.splice(from, 1);
+      copy.splice(to, 0, removed);
+      return copy;
+    });
+    setUploadedImagePaths(prev => {
+      const copy = [...prev];
+      const [removed] = copy.splice(from, 1);
+      copy.splice(to, 0, removed);
+      return copy;
+    });
+
+    dragItem.current = null;
+    dragOverItem.current = null;
   };
 
   const handleDeleteClick = (skinId: string) => {
@@ -716,10 +753,31 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
               <div className="mb-6">
                 <label className="block text-sm text-gray-400 mb-2">Gallery Images</label>
 
+                {uploadedImages.length > 0 && (
+                  <p className="text-xs text-gray-500 mb-2">Drag images to reorder. First image becomes the thumbnail.</p>
+                )}
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   {uploadedImages.map((image, index) => (
-                    <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-slate-800 border border-slate-700">
+                    <div
+                      key={`${index}-${image.slice(-20)}`}
+                      draggable
+                      onDragStart={() => handleDragStart(index)}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDrop={handleDrop}
+                      className="relative aspect-video rounded-lg overflow-hidden bg-slate-800 border border-slate-700 cursor-grab active:cursor-grabbing group"
+                    >
                       <img src={image} alt={`Upload ${index + 1}`} className="w-full h-full object-cover" />
+                      {index === 0 && (
+                        <span className="absolute top-2 left-2 px-2 py-0.5 bg-orange-500 text-white text-[10px] font-bold rounded">
+                          THUMBNAIL
+                        </span>
+                      )}
+                      <div className="absolute top-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="bg-black/70 px-2 py-1 rounded flex items-center gap-1">
+                          <GripVertical className="w-3 h-3 text-white" />
+                          <span className="text-[10px] text-white">Drag</span>
+                        </div>
+                      </div>
                       <button
                         type="button"
                         onClick={() => handleRemoveImage(index)}
