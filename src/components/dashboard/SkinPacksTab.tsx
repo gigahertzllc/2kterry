@@ -55,11 +55,11 @@ async function uploadToR2(file: File, onProgress?: (progress: number) => void): 
       if (xhr.status >= 200 && xhr.status < 300) {
         resolve({ r2Key, publicUrl });
       } else {
-        reject(new Error(`Upload failed with status ${xhr.status}`));
+        reject(new Error(`R2 PUT failed: status ${xhr.status} - ${xhr.responseText || xhr.statusText}`));
       }
     });
 
-    xhr.addEventListener('error', () => reject(new Error('Network error during upload')));
+    xhr.addEventListener('error', () => reject(new Error('Network error uploading to R2 (possibly CORS). Check R2 bucket CORS settings.')));
     xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
 
     xhr.open('PUT', uploadUrl);

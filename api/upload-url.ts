@@ -31,6 +31,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // Validate R2 config before proceeding
+    const missingVars = [];
+    if (!process.env.R2_ACCOUNT_ID) missingVars.push('R2_ACCOUNT_ID');
+    if (!process.env.R2_ACCESS_KEY_ID) missingVars.push('R2_ACCESS_KEY_ID');
+    if (!process.env.R2_SECRET_ACCESS_KEY) missingVars.push('R2_SECRET_ACCESS_KEY');
+    if (missingVars.length > 0) {
+      return res.status(500).json({ error: `R2 not configured: missing ${missingVars.join(', ')}` });
+    }
+
     const { filename, contentType, fileSize } = req.body;
 
     if (!filename) {
