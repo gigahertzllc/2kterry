@@ -6,6 +6,7 @@ import { SkinDetailPage } from './components/SkinDetailPage';
 import { DashboardPage } from './components/DashboardPage';
 import { AdminLogin } from './components/AdminLogin';
 import { CheckoutSuccess } from './components/CheckoutSuccess';
+import { InstallGuidePage } from './components/InstallGuidePage';
 import { games as defaultGames, skinPacks as defaultSkinPacks } from './data/mockData';
 import { SkinPack } from './types';
 import { useEffect } from 'react';
@@ -306,6 +307,10 @@ export default function App() {
         </div>
       )}
 
+      {currentPage === 'install-guide' && (
+        <InstallGuidePage onNavigate={handleNavigate} />
+      )}
+
       {/* Admin Login Modal */}
       {showAdminLogin && (
         <AdminLogin
@@ -320,7 +325,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-slate-950 border-t border-slate-800 py-12">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
               <h4 className="mb-4">2kTerrysMods</h4>
               <p className="text-gray-400 text-sm">
@@ -329,24 +334,10 @@ export default function App() {
             </div>
 
             <div>
-              <h4 className="mb-4 text-sm">Supported Games</h4>
+              <h4 className="mb-4 text-sm">Quick Links</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                {games.map((game) => (
-                  <li key={game.id}>
-                    <button
-                      onClick={() => handleNavigate('shop')}
-                      className="hover:text-orange-400 transition-colors"
-                    >
-                      {game.name}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="mb-4 text-sm">Connect</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
+                <li><button onClick={() => handleNavigate('shop')} className="hover:text-orange-400 transition-colors">Browse Mods</button></li>
+                <li><button onClick={() => handleNavigate('install-guide')} className="hover:text-orange-400 transition-colors">How to Install</button></li>
                 <li><a href="https://buymeacoffee.com/2kterrysmods" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">Support Us</a></li>
                 <li><span className="text-gray-500">Discord — Coming Soon</span></li>
               </ul>

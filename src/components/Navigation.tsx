@@ -1,4 +1,4 @@
-import { ShoppingBag, LayoutDashboard, Home, Heart, Info } from 'lucide-react';
+import { ShoppingBag, LayoutDashboard, Home, Heart, Info, BookOpen } from 'lucide-react';
 import { useState, useRef } from 'react';
 
 interface NavigationProps {
@@ -110,6 +110,18 @@ export function Navigation({ currentPage, onNavigate, onLogoClick, onAdminAccess
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Mods</span>
+            </button>
+
+            <button
+              onClick={() => onNavigate('install-guide')}
+              className={`px-4 py-2 flex items-center gap-2 transition-all ${
+                currentPage === 'install-guide'
+                  ? 'bg-orange-500 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Install Guide</span>
             </button>
 
             <button
