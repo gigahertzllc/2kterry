@@ -307,7 +307,7 @@ export default function App() {
                 <li><button onClick={() => handleNavigate('shop')} className="hover:text-orange-400 transition-colors">Browse Mods</button></li>
                 <li><button onClick={() => handleNavigate('install-guide')} className="hover:text-orange-400 transition-colors">How to Install</button></li>
                 <li><a href="https://buymeacoffee.com/2kterrysmods" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">Support Us</a></li>
-                <li><span className="text-gray-500">Discord — Coming Soon</span></li>
+                <li><a href="https://discord.gg/fmx8F4Ue" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">Leave your Comments in the Discord</a></li>
               </ul>
             </div>
 
