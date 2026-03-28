@@ -29,8 +29,8 @@ export const skinPacks: SkinPack[] = [
       '/images/brand/mascot-hero.jpg'
     ],
     thumbnail: '/images/brand/bulls-cyberface.jpg',
-    downloads: 5120,
-    rating: 4.8,
+    downloads: 0,
+    rating: 0,
     dateAdded: '2026-03-15',
     fileSize: '178 MB',
     featured: true,
@@ -51,8 +51,8 @@ export const skinPacks: SkinPack[] = [
       '/images/brand/bulls-cyberface.jpg'
     ],
     thumbnail: '/images/brand/poster-silhouettes.jpg',
-    downloads: 4100,
-    rating: 4.6,
+    downloads: 0,
+    rating: 0,
     dateAdded: '2026-03-05',
     fileSize: '964 KB',
     featured: true,
