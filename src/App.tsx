@@ -23,8 +23,82 @@ export default function App() {
   const [adminSession, setAdminSession] = useState<any>(null);
   const [adminData, setAdminData] = useState<any>(null);
 
-  // Load data: defaults are always authoritative for known packs,
-  // DB adds any admin-created packs on top
+  // Known old test/dummy pack names to clean from Supabase
+  const KNOWN_DUMMY_NAMES = new Set([
+    '2K26 Cyberface Pack Vol. 1',
+    'Court Fog Effect Pack',
+    'All-Star Weekend Jersey Pack',
+    'Classic Courts Collection',
+    'HD Cyberface Pack Vol. 1',
+    'Custom Court Pack - Retro Edition',
+    'All-Star Jersey Collection 2024',
+    'Historic Teams Roster Pack',
+  ]);
+
+  // Shared function: load packs with defaults as authoritative base,
+  // merge DB-only fields (like active/visibility), add admin-created packs
+  async function loadMergedPacks(): Promise<SkinPack[]> {
+    // Default packs are ALWAYS the base — correct images/thumbnails guaranteed
+    const defaultById = new Map(defaultSkinPacks.map(p => [p.id, p]));
+    const defaultByName = new Map(defaultSkinPacks.map(p => [p.name, p]));
+    const allPacks: SkinPack[] = [...defaultSkinPacks];
+
+    try {
+      const skinPacksData = await api.getSkinPacks();
+      const dbPacks = skinPacksData.skinPacks || [];
+
+      for (const dbPack of dbPacks) {
+        // Check if this is a known dummy/test pack — delete it
+        if (KNOWN_DUMMY_NAMES.has(dbPack.name)) {
+          try { await api.deleteSkinPack(dbPack.id); } catch (e) { /* ignore */ }
+          console.log(`Deleted dummy pack from DB: ${dbPack.name}`);
+          continue;
+        }
+
+        // Check if this DB pack matches a default (by id or name)
+        const matchById = defaultById.get(dbPack.id);
+        const matchByName = defaultByName.get(dbPack.name);
+        const defaultMatch = matchById || matchByName;
+
+        if (defaultMatch) {
+          // Merge DB-only fields (active, downloads, etc.) into the default
+          // but KEEP default images/thumbnail — they're the correct local paths
+          const idx = allPacks.findIndex(p => p.id === defaultMatch.id);
+          if (idx !== -1) {
+            allPacks[idx] = {
+              ...defaultMatch,              // base: correct images, thumbnail, etc.
+              active: dbPack.active,         // from DB: visibility toggle state
+              downloads: dbPack.downloads ?? defaultMatch.downloads,
+              rating: dbPack.rating ?? defaultMatch.rating,
+            };
+          }
+        } else {
+          // Admin-created pack — use DB data as-is
+          allPacks.push(dbPack);
+          console.log(`Loaded admin-created pack: ${dbPack.name}`);
+        }
+      }
+
+      // Sync defaults TO Supabase so admin operations (visibility toggle, etc.) persist
+      for (const defaultPack of defaultSkinPacks) {
+        const existsInDb = dbPacks.some(
+          (p: SkinPack) => p.id === defaultPack.id || p.name === defaultPack.name
+        );
+        if (!existsInDb) {
+          try {
+            await api.createSkinPack(defaultPack);
+            console.log(`Synced default pack to DB: ${defaultPack.name}`);
+          } catch (e) { /* ignore duplicates */ }
+        }
+      }
+    } catch (dbError) {
+      console.log('Could not load from Supabase, using defaults only');
+    }
+
+    return allPacks;
+  }
+
+  // Load data on mount
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
@@ -39,42 +113,7 @@ export default function App() {
         // Initialize database with default games
         await api.initializeDatabase();
 
-        // Default packs are ALWAYS the base — they have correct images/thumbnails
-        const allPacks = [...defaultSkinPacks];
-
-        // Load admin-created packs from Supabase (anything not matching a default)
-        try {
-          const skinPacksData = await api.getSkinPacks();
-          const dbPacks = skinPacksData.skinPacks || [];
-          const defaultNames = new Set(defaultSkinPacks.map(p => p.name));
-
-          // Only keep DB packs that are admin-created (not matching any default)
-          const adminCreatedPacks = dbPacks.filter(
-            (p: SkinPack) => !defaultNames.has(p.name)
-          );
-
-          if (adminCreatedPacks.length > 0) {
-            allPacks.push(...adminCreatedPacks);
-            console.log(`Loaded ${adminCreatedPacks.length} admin-created packs from database`);
-          }
-
-          // Clean up stale packs from DB (old defaults that no longer exist)
-          // Keep admin-created packs that have images (they were added intentionally)
-          const stalePacks = dbPacks.filter((p: SkinPack) => {
-            if (defaultNames.has(p.name)) return false; // matches a current default, keep
-            if (p.thumbnail && p.images?.length > 0) return false; // has images, probably admin-created, keep
-            return true; // stale: doesn't match defaults and has no images
-          });
-          for (const stale of stalePacks) {
-            try { await api.deleteSkinPack(stale.id); } catch (e) { /* ignore */ }
-          }
-          if (stalePacks.length > 0) {
-            console.log(`Cleaned up ${stalePacks.length} stale packs from database`);
-          }
-        } catch (dbError) {
-          console.log('Could not load from Supabase, using defaults only');
-        }
-
+        const allPacks = await loadMergedPacks();
         setGames(defaultGames);
         setSkinPacks(allPacks);
         console.log(`Showing ${allPacks.length} total packs`);
@@ -137,13 +176,11 @@ export default function App() {
     setShowAdminLogin(false);
     setCurrentPage('dashboard');
 
-    // On admin login, reload packs from DB to ensure fresh state
+    // Reload using the same defaults-first logic — never replace defaults with DB data
     try {
-      const { skinPacks: remotePacks } = await api.getSkinPacks();
-      if (remotePacks.length > 0) {
-        setSkinPacks(remotePacks);
-        console.log(`Admin login: loaded ${remotePacks.length} packs from DB`);
-      }
+      const allPacks = await loadMergedPacks();
+      setSkinPacks(allPacks);
+      console.log(`Admin login: showing ${allPacks.length} packs`);
     } catch (e) {
       console.log('Could not refresh packs from Supabase');
     }

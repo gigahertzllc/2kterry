@@ -625,18 +625,18 @@ app.get("/make-server-832015f7/skin-packs", async (c) => {
       fixedSkinPacks.map(async (pack: any) => {
         try {
           const imagesWithUrls = pack.images.map((imagePath: string) => {
-            // Skip if it's already a full URL (http, https, or blob)
-            if (imagePath.startsWith('http') || imagePath.startsWith('blob:')) {
+            // Skip full URLs (http/https/blob) and local web paths (start with /)
+            if (imagePath.startsWith('http') || imagePath.startsWith('blob:') || imagePath.startsWith('/')) {
               return imagePath;
             }
-            // Return PUBLIC URL for storage paths (no expiration)
+            // Only convert storage-relative paths to public URLs
             const publicUrl = getPublicUrl(IMAGES_BUCKET_NAME, imagePath);
             console.log(`Generated public URL for ${imagePath}: ${publicUrl}`);
             return publicUrl;
           });
-          
+
           let thumbnailUrl = pack.thumbnail;
-          if (!pack.thumbnail.startsWith('http') && !pack.thumbnail.startsWith('blob:')) {
+          if (!pack.thumbnail.startsWith('http') && !pack.thumbnail.startsWith('blob:') && !pack.thumbnail.startsWith('/')) {
             thumbnailUrl = getPublicUrl(IMAGES_BUCKET_NAME, pack.thumbnail);
             console.log(`Generated public URL for thumbnail ${pack.thumbnail}: ${thumbnailUrl}`);
           }
