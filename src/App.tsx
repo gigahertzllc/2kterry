@@ -7,7 +7,7 @@ import { DashboardPage } from './components/DashboardPage';
 import { AdminLogin } from './components/AdminLogin';
 import { CheckoutSuccess } from './components/CheckoutSuccess';
 import { InstallGuidePage } from './components/InstallGuidePage';
-import { games as defaultGames, skinPacks as defaultSkinPacks } from './data/mockData';
+import { games as defaultGames, skinPacks as seedSkinPacks } from './data/mockData';
 import { SkinPack } from './types';
 import { useEffect } from 'react';
 import * as api from './utils/api';
@@ -24,70 +24,27 @@ export default function App() {
   const [adminSession, setAdminSession] = useState<any>(null);
   const [adminData, setAdminData] = useState<any>(null);
 
-  // Known old test/dummy pack names to clean from Supabase
-  const KNOWN_DUMMY_NAMES = new Set([
-    '2K26 Cyberface Pack Vol. 1',
-    'Court Fog Effect Pack',
-    'All-Star Weekend Jersey Pack',
-    'Classic Courts Collection',
-    'HD Cyberface Pack Vol. 1',
-    'Custom Court Pack - Retro Edition',
-    'All-Star Jersey Collection 2024',
-    'Historic Teams Roster Pack',
-  ]);
-
-  // Shared function: load packs from Supabase (source of truth),
-  // fall back to hardcoded defaults only if DB is empty or unreachable
-  async function loadMergedPacks(): Promise<SkinPack[]> {
-    const defaultById = new Map(defaultSkinPacks.map(p => [p.id, p]));
-    const defaultByName = new Map(defaultSkinPacks.map(p => [p.name, p]));
-
+  // Load packs from Supabase — the ONLY source of truth.
+  // Seed data is only used once if the DB has never been populated.
+  // After that, whatever is in the DB is what shows. Period.
+  async function loadPacks(): Promise<SkinPack[]> {
     try {
-      const skinPacksData = await api.getSkinPacks();
-      const dbPacks = (skinPacksData.skinPacks || []) as SkinPack[];
+      const { skinPacks: dbPacks } = await api.getSkinPacks();
 
-      // Clean known dummy/test packs
-      const cleanPacks: SkinPack[] = [];
-      for (const dbPack of dbPacks) {
-        if (KNOWN_DUMMY_NAMES.has(dbPack.name)) {
-          try { await api.deleteSkinPack(dbPack.id); } catch (e) { /* ignore */ }
-          console.log(`Deleted dummy pack from DB: ${dbPack.name}`);
-          continue;
-        }
-        cleanPacks.push(dbPack);
+      if (dbPacks.length > 0) {
+        console.log(`Loaded ${dbPacks.length} packs from database`);
+        return dbPacks;
       }
 
-      // If DB has packs, use them — DB is the source of truth
-      // Admin edits (new images, reordering, visibility) are all saved there
-      if (cleanPacks.length > 0) {
-        // Check if any defaults are missing from DB and sync them
-        for (const defaultPack of defaultSkinPacks) {
-          const existsInDb = cleanPacks.some(
-            (p: SkinPack) => p.id === defaultPack.id || p.name === defaultPack.name
-          );
-          if (!existsInDb) {
-            try {
-              await api.createSkinPack(defaultPack);
-              cleanPacks.push(defaultPack);
-              console.log(`Synced default pack to DB: ${defaultPack.name}`);
-            } catch (e) { /* ignore duplicates */ }
-          }
-        }
-        console.log(`Loaded ${cleanPacks.length} packs from database`);
-        return cleanPacks;
+      // DB is completely empty (first-ever run) — seed it
+      console.log('Database empty, seeding initial packs');
+      for (const pack of seedSkinPacks) {
+        try { await api.createSkinPack(pack); } catch (e) { /* ignore */ }
       }
-
-      // DB is empty — seed it with defaults
-      console.log('Database empty, seeding with default packs');
-      for (const defaultPack of defaultSkinPacks) {
-        try {
-          await api.createSkinPack(defaultPack);
-        } catch (e) { /* ignore */ }
-      }
-      return [...defaultSkinPacks];
-    } catch (dbError) {
-      console.log('Could not reach Supabase, using defaults only');
-      return [...defaultSkinPacks];
+      return [...seedSkinPacks];
+    } catch (err) {
+      console.error('Could not reach Supabase:', err);
+      return [];
     }
   }
 
@@ -106,14 +63,14 @@ export default function App() {
         // Initialize database with default games
         await api.initializeDatabase();
 
-        const allPacks = await loadMergedPacks();
+        const allPacks = await loadPacks();
         setGames(defaultGames);
         setSkinPacks(allPacks);
         console.log(`Showing ${allPacks.length} total packs`);
       } catch (error) {
-        console.error('Error loading data, using defaults:', error);
+        console.error('Error loading data:', error);
         setGames(defaultGames);
-        setSkinPacks(defaultSkinPacks);
+        setSkinPacks([]);
       } finally {
         setIsLoading(false);
       }
@@ -169,9 +126,9 @@ export default function App() {
     setShowAdminLogin(false);
     setCurrentPage('dashboard');
 
-    // Reload using the same defaults-first logic — never replace defaults with DB data
+    // Reload from DB
     try {
-      const allPacks = await loadMergedPacks();
+      const allPacks = await loadPacks();
       setSkinPacks(allPacks);
       console.log(`Admin login: showing ${allPacks.length} packs`);
     } catch (e) {
