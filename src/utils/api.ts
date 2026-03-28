@@ -3,6 +3,31 @@ import { Game, SkinPack } from '../types';
 
 const API_URL = `https://${projectId}.supabase.co/functions/v1/make-server-832015f7`;
 
+// Pattern: the edge function wrongly converts local paths like /images/brand/foo.jpg
+// into Supabase storage URLs. This regex catches those and extracts the original path.
+const BROKEN_STORAGE_URL = new RegExp(
+  `https://${projectId}\\.supabase\\.co/storage/v1/object/public/[^/]+(/images/.+)$`
+);
+
+// Fix image URLs that the edge function mangled from local paths into broken storage URLs
+function fixImageUrl(url: string): string {
+  if (!url) return url;
+  const match = url.match(BROKEN_STORAGE_URL);
+  if (match) {
+    // Extract the original local path like /images/brand/foo.jpg
+    return match[1];
+  }
+  return url;
+}
+
+function fixPackImages(pack: SkinPack): SkinPack {
+  return {
+    ...pack,
+    thumbnail: fixImageUrl(pack.thumbnail),
+    images: (pack.images || []).map(fixImageUrl),
+  };
+}
+
 const headers = {
   'Authorization': `Bearer ${publicAnonKey}`,
   'Content-Type': 'application/json',
@@ -73,7 +98,9 @@ export async function getSkinPacks(): Promise<{ skinPacks: SkinPack[] }> {
   try {
     const response = await fetch(`${API_URL}/skin-packs`, { headers });
     const data = await response.json();
-    return { skinPacks: data.skinPacks || [] };
+    // Fix any image URLs mangled by the edge function
+    const packs = (data.skinPacks || []).map(fixPackImages);
+    return { skinPacks: packs };
   } catch (error) {
     console.error('Error fetching skin packs from API:', error);
     return { skinPacks: [] };
@@ -83,13 +110,14 @@ export async function getSkinPacks(): Promise<{ skinPacks: SkinPack[] }> {
 export async function getSkinPack(id: string): Promise<SkinPack | null> {
   try {
     const response = await fetch(`${API_URL}/skin-packs/${id}`, { headers });
-    
+
     if (!response.ok) {
       return null;
     }
-    
+
     const data = await response.json();
-    return data.skinPack;
+    // Fix any image URLs mangled by the edge function
+    return data.skinPack ? fixPackImages(data.skinPack) : null;
   } catch (error) {
     console.error('Error fetching skin pack from API:', error);
     return null;
