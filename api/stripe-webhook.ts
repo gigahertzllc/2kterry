@@ -225,6 +225,60 @@ async function incrementSkinPackDownloads(skinPackId: string): Promise<void> {
   }
 }
 
+async function resolveMetadata(
+  session: Stripe.Checkout.Session
+): Promise<{ skinPackId: string; skinPackName: string }> {
+  // 1. Try session.metadata first (set when using direct Checkout Sessions)
+  const sessionMeta = session.metadata || {};
+  let skinPackId = sessionMeta.skin_pack_id || sessionMeta.skinPackId || '';
+  let skinPackName = sessionMeta.skin_pack_name || sessionMeta.skinPackName || '';
+
+  if (skinPackId) {
+    return { skinPackId, skinPackName };
+  }
+
+  // 2. Try payment link metadata (Payment Links don't copy metadata to session)
+  if (session.payment_link) {
+    try {
+      const paymentLinkId = typeof session.payment_link === 'string'
+        ? session.payment_link
+        : session.payment_link.id;
+      const paymentLink = await stripe.paymentLinks.retrieve(paymentLinkId);
+      const plMeta = paymentLink.metadata || {};
+      skinPackId = plMeta.skin_pack_id || plMeta.skinPackId || '';
+      skinPackName = plMeta.skin_pack_name || plMeta.skinPackName || '';
+      if (skinPackId) {
+        console.log('Resolved metadata from payment link:', { skinPackId, skinPackName });
+        return { skinPackId, skinPackName };
+      }
+    } catch (err) {
+      console.error('Error fetching payment link metadata:', err);
+    }
+  }
+
+  // 3. Try line items → product metadata as last resort
+  try {
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+      expand: ['data.price.product'],
+    });
+    for (const item of lineItems.data) {
+      const product = (item.price as any)?.product as Stripe.Product | undefined;
+      if (product && typeof product !== 'string' && product.metadata) {
+        skinPackId = product.metadata.skin_pack_id || product.metadata.skinPackId || '';
+        skinPackName = product.metadata.skin_pack_name || product.metadata.skinPackName || product.name || '';
+        if (skinPackId) {
+          console.log('Resolved metadata from product:', { skinPackId, skinPackName });
+          return { skinPackId, skinPackName };
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching line items metadata:', err);
+  }
+
+  return { skinPackId, skinPackName };
+}
+
 async function handleCheckoutSessionCompleted(
   event: Stripe.CheckoutSessionCompletedEvent
 ): Promise<void> {
@@ -235,15 +289,16 @@ async function handleCheckoutSessionCompleted(
     const customerEmail = session.customer_details?.email;
     const customerName = session.customer_details?.name;
     const amount = session.amount_total ? session.amount_total / 100 : 0; // Convert from cents
-    // Metadata can come from session.metadata or from the payment link metadata
-    const metadata = session.metadata || {};
-    const skinPackId = metadata.skin_pack_id || metadata.skinPackId || '';
-    const skinPackName = metadata.skin_pack_name || metadata.skinPackName || '';
+
+    // Resolve metadata from session, payment link, or product (in that order)
+    const { skinPackId, skinPackName } = await resolveMetadata(session);
 
     if (!customerEmail || !skinPackId) {
       console.error('Missing required fields in checkout session', {
         customerEmail,
         skinPackId,
+        sessionId: session.id,
+        paymentLink: session.payment_link,
       });
       return;
     }
