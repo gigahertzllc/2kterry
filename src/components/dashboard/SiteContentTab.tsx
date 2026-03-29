@@ -4,6 +4,87 @@ import { SiteContent } from '../../types';
 import * as api from '../../utils/api';
 import { toast } from 'sonner';
 
+// ---- Extracted sub-components (defined OUTSIDE the parent to avoid focus loss) ----
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  section,
+  expanded,
+  onToggle,
+}: {
+  icon: any;
+  title: string;
+  section: string;
+  expanded: boolean;
+  onToggle: (section: string) => void;
+}) {
+  return (
+    <button
+      onClick={() => onToggle(section)}
+      className="w-full flex items-center gap-4 p-6 bg-slate-800 hover:bg-slate-700 rounded-2xl border border-slate-700 transition-colors mb-6"
+    >
+      <Icon className="w-6 h-6 text-orange-400" />
+      <span className="flex-1 text-left font-semibold">{title}</span>
+      {expanded ? (
+        <ChevronDown className="w-5 h-5 text-gray-400" />
+      ) : (
+        <ChevronRight className="w-5 h-5 text-gray-400" />
+      )}
+    </button>
+  );
+}
+
+function TextInput({
+  label,
+  field,
+  value,
+  onChange,
+}: {
+  label: string;
+  field: keyof SiteContent;
+  value: string;
+  onChange: (field: keyof SiteContent, value: string) => void;
+}) {
+  return (
+    <div className="mb-4">
+      <label className="block text-sm text-gray-400 mb-2">{label}</label>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(field, e.target.value)}
+        className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
+      />
+    </div>
+  );
+}
+
+function TextArea({
+  label,
+  field,
+  value,
+  onChange,
+}: {
+  label: string;
+  field: keyof SiteContent;
+  value: string;
+  onChange: (field: keyof SiteContent, value: string) => void;
+}) {
+  return (
+    <div className="mb-4">
+      <label className="block text-sm text-gray-400 mb-2">{label}</label>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(field, e.target.value)}
+        className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors resize-none"
+        rows={4}
+      />
+    </div>
+  );
+}
+
+// ---- Main component ----
+
 export function SiteContentTab() {
   const [content, setContent] = useState<SiteContent | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,45 +159,6 @@ export function SiteContentTab() {
     );
   }
 
-  const SectionHeader = ({ icon: Icon, title, section }: { icon: any; title: string; section: string }) => (
-    <button
-      onClick={() => toggleSection(section)}
-      className="w-full flex items-center gap-4 p-6 bg-slate-800 hover:bg-slate-700 rounded-2xl border border-slate-700 transition-colors mb-6"
-    >
-      <Icon className="w-6 h-6 text-orange-400" />
-      <span className="flex-1 text-left font-semibold">{title}</span>
-      {expandedSections[section] ? (
-        <ChevronDown className="w-5 h-5 text-gray-400" />
-      ) : (
-        <ChevronRight className="w-5 h-5 text-gray-400" />
-      )}
-    </button>
-  );
-
-  const TextInput = ({ label, field, value }: { label: string; field: keyof SiteContent; value: string }) => (
-    <div className="mb-4">
-      <label className="block text-sm text-gray-400 mb-2">{label}</label>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => handleInputChange(field, e.target.value)}
-        className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
-      />
-    </div>
-  );
-
-  const TextArea = ({ label, field, value }: { label: string; field: keyof SiteContent; value: string }) => (
-    <div className="mb-4">
-      <label className="block text-sm text-gray-400 mb-2">{label}</label>
-      <textarea
-        value={value}
-        onChange={(e) => handleInputChange(field, e.target.value)}
-        className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-orange-500 transition-colors resize-none"
-        rows={4}
-      />
-    </div>
-  );
-
   return (
     <div>
       {/* Header */}
@@ -136,76 +178,76 @@ export function SiteContentTab() {
       </div>
 
       {/* Hero Section */}
-      <SectionHeader icon={Layout} title="Hero Section" section="hero" />
+      <SectionHeader icon={Layout} title="Hero Section" section="hero" expanded={expandedSections.hero} onToggle={toggleSection} />
       {expandedSections.hero && (
         <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 mb-8">
-          <TextInput label="Heading" field="heroHeading" value={content.heroHeading} />
-          <TextInput label="Subheading" field="heroSubheading" value={content.heroSubheading} />
-          <TextInput label="CTA Button Text" field="heroCtaText" value={content.heroCtaText} />
-          <TextInput label="Hero Image Path" field="heroImagePath" value={content.heroImagePath} />
+          <TextInput label="Heading" field="heroHeading" value={content.heroHeading} onChange={handleInputChange} />
+          <TextInput label="Subheading" field="heroSubheading" value={content.heroSubheading} onChange={handleInputChange} />
+          <TextInput label="CTA Button Text" field="heroCtaText" value={content.heroCtaText} onChange={handleInputChange} />
+          <TextInput label="Hero Image Path" field="heroImagePath" value={content.heroImagePath} onChange={handleInputChange} />
         </div>
       )}
 
       {/* About Page */}
-      <SectionHeader icon={FileText} title="About Page" section="about" />
+      <SectionHeader icon={FileText} title="About Page" section="about" expanded={expandedSections.about} onToggle={toggleSection} />
       {expandedSections.about && (
         <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 mb-8">
-          <TextInput label="About Heading" field="aboutHeading" value={content.aboutHeading} />
-          <TextArea label="About Text" field="aboutText" value={content.aboutText} />
+          <TextInput label="About Heading" field="aboutHeading" value={content.aboutHeading} onChange={handleInputChange} />
+          <TextArea label="About Text" field="aboutText" value={content.aboutText} onChange={handleInputChange} />
         </div>
       )}
 
       {/* Donation Page */}
-      <SectionHeader icon={Heart} title="Donation Page" section="donation" />
+      <SectionHeader icon={Heart} title="Donation Page" section="donation" expanded={expandedSections.donation} onToggle={toggleSection} />
       {expandedSections.donation && (
         <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 mb-8">
-          <TextInput label="Donation Heading" field="donationHeading" value={content.donationHeading} />
-          <TextArea label="Donation Text" field="donationText" value={content.donationText} />
-          <TextInput label="Donation URL" field="donationUrl" value={content.donationUrl} />
-          <TextInput label="Donation Button Text" field="donationButtonText" value={content.donationButtonText} />
+          <TextInput label="Donation Heading" field="donationHeading" value={content.donationHeading} onChange={handleInputChange} />
+          <TextArea label="Donation Text" field="donationText" value={content.donationText} onChange={handleInputChange} />
+          <TextInput label="Donation URL" field="donationUrl" value={content.donationUrl} onChange={handleInputChange} />
+          <TextInput label="Donation Button Text" field="donationButtonText" value={content.donationButtonText} onChange={handleInputChange} />
         </div>
       )}
 
       {/* Features Section */}
-      <SectionHeader icon={Star} title="Features Section" section="features" />
+      <SectionHeader icon={Star} title="Features Section" section="features" expanded={expandedSections.features} onToggle={toggleSection} />
       {expandedSections.features && (
         <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 mb-8">
           <h4 className="mb-6 text-orange-400">Feature 1</h4>
-          <TextInput label="Feature 1 Title" field="feature1Title" value={content.feature1Title} />
-          <TextInput label="Feature 1 Description" field="feature1Description" value={content.feature1Description} />
+          <TextInput label="Feature 1 Title" field="feature1Title" value={content.feature1Title} onChange={handleInputChange} />
+          <TextInput label="Feature 1 Description" field="feature1Description" value={content.feature1Description} onChange={handleInputChange} />
 
           <h4 className="mb-6 mt-8 text-orange-400">Feature 2</h4>
-          <TextInput label="Feature 2 Title" field="feature2Title" value={content.feature2Title} />
-          <TextInput label="Feature 2 Description" field="feature2Description" value={content.feature2Description} />
+          <TextInput label="Feature 2 Title" field="feature2Title" value={content.feature2Title} onChange={handleInputChange} />
+          <TextInput label="Feature 2 Description" field="feature2Description" value={content.feature2Description} onChange={handleInputChange} />
 
           <h4 className="mb-6 mt-8 text-orange-400">Feature 3</h4>
-          <TextInput label="Feature 3 Title" field="feature3Title" value={content.feature3Title} />
-          <TextInput label="Feature 3 Description" field="feature3Description" value={content.feature3Description} />
+          <TextInput label="Feature 3 Title" field="feature3Title" value={content.feature3Title} onChange={handleInputChange} />
+          <TextInput label="Feature 3 Description" field="feature3Description" value={content.feature3Description} onChange={handleInputChange} />
         </div>
       )}
 
       {/* Testimonials Section */}
-      <SectionHeader icon={MessageSquare} title="Testimonials Section" section="testimonials" />
+      <SectionHeader icon={MessageSquare} title="Testimonials Section" section="testimonials" expanded={expandedSections.testimonials} onToggle={toggleSection} />
       {expandedSections.testimonials && (
         <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 mb-8">
-          <TextInput label="Testimonials Heading" field="testimonialsHeading" value={content.testimonialsHeading} />
-          <TextInput label="Testimonials Subheading" field="testimonialsSubheading" value={content.testimonialsSubheading} />
+          <TextInput label="Testimonials Heading" field="testimonialsHeading" value={content.testimonialsHeading} onChange={handleInputChange} />
+          <TextInput label="Testimonials Subheading" field="testimonialsSubheading" value={content.testimonialsSubheading} onChange={handleInputChange} />
         </div>
       )}
 
       {/* Footer Section */}
-      <SectionHeader icon={Globe} title="Footer" section="footer" />
+      <SectionHeader icon={Globe} title="Footer" section="footer" expanded={expandedSections.footer} onToggle={toggleSection} />
       {expandedSections.footer && (
         <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 mb-8">
-          <TextInput label="Brand Name" field="footerBrandName" value={content.footerBrandName} />
-          <TextInput label="Brand Description" field="footerDescription" value={content.footerDescription} />
-          <TextInput label="Copyright Text" field="footerCopyright" value={content.footerCopyright} />
-          <TextInput label="Contact Email" field="footerContactEmail" value={content.footerContactEmail} />
-          <TextInput label="Refund Policy Text" field="footerRefundPolicy" value={content.footerRefundPolicy} />
-          <TextInput label="Discord URL" field="footerDiscordUrl" value={content.footerDiscordUrl} />
-          <TextInput label="Discord Link Text" field="footerDiscordText" value={content.footerDiscordText} />
-          <TextInput label="Donation URL" field="footerDonationUrl" value={content.footerDonationUrl} />
-          <TextInput label="Donation Link Text" field="footerDonationText" value={content.footerDonationText} />
+          <TextInput label="Brand Name" field="footerBrandName" value={content.footerBrandName} onChange={handleInputChange} />
+          <TextInput label="Brand Description" field="footerDescription" value={content.footerDescription} onChange={handleInputChange} />
+          <TextInput label="Copyright Text" field="footerCopyright" value={content.footerCopyright} onChange={handleInputChange} />
+          <TextInput label="Contact Email" field="footerContactEmail" value={content.footerContactEmail} onChange={handleInputChange} />
+          <TextInput label="Refund Policy Text" field="footerRefundPolicy" value={content.footerRefundPolicy} onChange={handleInputChange} />
+          <TextInput label="Discord URL" field="footerDiscordUrl" value={content.footerDiscordUrl} onChange={handleInputChange} />
+          <TextInput label="Discord Link Text" field="footerDiscordText" value={content.footerDiscordText} onChange={handleInputChange} />
+          <TextInput label="Donation URL" field="footerDonationUrl" value={content.footerDonationUrl} onChange={handleInputChange} />
+          <TextInput label="Donation Link Text" field="footerDonationText" value={content.footerDonationText} onChange={handleInputChange} />
         </div>
       )}
 
