@@ -8,10 +8,11 @@ import { AdminLogin } from './components/AdminLogin';
 import { CheckoutSuccess } from './components/CheckoutSuccess';
 import { InstallGuidePage } from './components/InstallGuidePage';
 import { games as defaultGames, skinPacks as seedSkinPacks } from './data/mockData';
-import { SkinPack, Testimonial } from './types';
+import { SkinPack, Testimonial, SiteContent } from './types';
 import { useEffect } from 'react';
 import * as api from './utils/api';
 import { defaultTestimonials } from './data/testimonials';
+import { defaultSiteContent } from './data/defaultSiteContent';
 import { toast, Toaster } from 'sonner';
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
   const [adminSession, setAdminSession] = useState<any>(null);
   const [adminData, setAdminData] = useState<any>(null);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [siteContent, setSiteContent] = useState<SiteContent>(defaultSiteContent);
 
   // Load packs from Supabase — the ONLY source of truth.
   // Seed data is only used once if the DB has never been populated.
@@ -69,6 +71,15 @@ export default function App() {
         setGames(defaultGames);
         setSkinPacks(allPacks);
         console.log(`Showing ${allPacks.length} total packs`);
+
+        // Load site content
+        try {
+          const content = await api.getSiteContent();
+          setSiteContent(content);
+        } catch (e) {
+          console.error('Error loading site content:', e);
+          setSiteContent(defaultSiteContent);
+        }
 
         // Load testimonials — seed defaults if empty
         try {
@@ -220,7 +231,7 @@ export default function App() {
       />
 
       {currentPage === 'home' && (
-        <HomePage latestSkins={latestSkins} featuredSkins={featuredSkins} testimonials={testimonials} onNavigate={handleNavigate} />
+        <HomePage siteContent={siteContent} latestSkins={latestSkins} featuredSkins={featuredSkins} testimonials={testimonials} onNavigate={handleNavigate} />
       )}
 
       {currentPage === 'shop' && (
@@ -248,12 +259,9 @@ export default function App() {
       {currentPage === 'about' && (
         <div className="min-h-screen pt-20 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
           <div className="max-w-7xl mx-auto px-6 py-20">
-            <h1 className="mb-6 text-4xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">About 2K Terry's Mods</h1>
+            <h1 className="mb-6 text-4xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">{siteContent.aboutHeading}</h1>
             <p className="text-gray-300 text-lg max-w-3xl">
-              2K Terry's Mods is a community-driven platform dedicated to providing premium NBA 2K mods.
-              From HD cyberfaces to custom courts and roster updates, we craft the highest quality modifications
-              for the serious 2K community. Our mods enhance your gaming experience with attention to detail
-              and realistic aesthetics.
+              {siteContent.aboutText}
             </p>
           </div>
         </div>
@@ -262,14 +270,12 @@ export default function App() {
       {currentPage === 'donation' && (
         <div className="min-h-screen pt-20 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
           <div className="max-w-7xl mx-auto px-6 py-20">
-            <h1 className="mb-6 text-4xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">Support 2K Terry's Mods</h1>
+            <h1 className="mb-6 text-4xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">{siteContent.donationHeading}</h1>
             <p className="text-gray-300 text-lg max-w-3xl mb-8">
-              Love our mods? Consider supporting the project to help us continue creating premium content
-              for the NBA 2K community. Your donation helps fund development, server costs, and enables us
-              to bring you more amazing mods.
+              {siteContent.donationText}
             </p>
-            <a href="https://buymeacoffee.com/2kterrysmods" target="_blank" rel="noopener noreferrer" className="inline-block px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all text-white font-semibold">
-              Donate Now
+            <a href={siteContent.donationUrl} target="_blank" rel="noopener noreferrer" className="inline-block px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all text-white font-semibold">
+              {siteContent.donationButtonText}
             </a>
           </div>
         </div>
@@ -295,9 +301,9 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
-              <h4 className="mb-4">2kTerrysMods</h4>
+              <h4 className="mb-4">{siteContent.footerBrandName}</h4>
               <p className="text-gray-400 text-sm">
-                Premium NBA 2K mods — cyberfaces, jerseys, courts, and more.
+                {siteContent.footerDescription}
               </p>
             </div>
 
@@ -306,22 +312,22 @@ export default function App() {
               <ul className="space-y-2 text-sm text-gray-400">
                 <li><button onClick={() => handleNavigate('shop')} className="hover:text-orange-400 transition-colors">Browse Mods</button></li>
                 <li><button onClick={() => handleNavigate('install-guide')} className="hover:text-orange-400 transition-colors">How to Install</button></li>
-                <li><a href="https://buymeacoffee.com/2kterrysmods" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">Support Us</a></li>
-                <li><a href="https://discord.gg/fmx8F4Ue" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">Leave your Comments in the Discord</a></li>
+                <li><a href={siteContent.footerDonationUrl} target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">{siteContent.footerDonationText}</a></li>
+                <li><a href={siteContent.footerDiscordUrl} target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">{siteContent.footerDiscordText}</a></li>
               </ul>
             </div>
 
             <div>
               <h4 className="mb-4 text-sm">Info</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="mailto:team@gigahertzcompany.com" className="hover:text-orange-400 transition-colors">Contact</a></li>
-                <li><span className="text-gray-500">All sales are final. No refunds.</span></li>
+                <li><a href={`mailto:${siteContent.footerContactEmail}`} className="hover:text-orange-400 transition-colors">Contact</a></li>
+                <li><span className="text-gray-500">{siteContent.footerRefundPolicy}</span></li>
               </ul>
             </div>
           </div>
 
           <div className="pt-8 border-t border-slate-800 text-center text-sm text-gray-400">
-            <p>© Copyright 2026 All Rights Reserved.</p>
+            <p>{siteContent.footerCopyright}</p>
           </div>
         </div>
       </footer>

@@ -1,5 +1,6 @@
 import { projectId, publicAnonKey } from './supabase/info';
-import { Game, SkinPack, Testimonial } from '../types';
+import { Game, SkinPack, Testimonial, SiteContent } from '../types';
+import { defaultSiteContent } from '../data/defaultSiteContent';
 
 const API_URL = `https://${projectId}.supabase.co/functions/v1/make-server-832015f7`;
 
@@ -539,5 +540,33 @@ export async function deleteTestimonial(id: string): Promise<void> {
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.error || 'Failed to delete testimonial');
+  }
+}
+
+// Site Content API
+export async function getSiteContent(): Promise<SiteContent> {
+  try {
+    const response = await fetch(`${API_URL}/site-content`, { headers });
+    if (!response.ok) {
+      return defaultSiteContent;
+    }
+    const data = await response.json();
+    return data.content || defaultSiteContent;
+  } catch (error) {
+    console.error('Error fetching site content:', error);
+    return defaultSiteContent;
+  }
+}
+
+export async function updateSiteContent(content: SiteContent): Promise<void> {
+  const response = await fetch(`${API_URL}/site-content`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(content),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to update site content');
   }
 }

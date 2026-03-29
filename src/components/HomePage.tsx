@@ -1,16 +1,17 @@
-import { SkinPack, Testimonial } from '../types';
+import { SkinPack, Testimonial, SiteContent } from '../types';
 import { useState, useEffect } from 'react';
 import { Download, Star, ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { TestimonialsSlider } from './TestimonialsSlider';
 
 interface HomePageProps {
+  siteContent: SiteContent;
   latestSkins: SkinPack[];
   featuredSkins: SkinPack[];
   testimonials: Testimonial[];
   onNavigate: (page: string, skinId?: string) => void;
 }
 
-export function HomePage({ latestSkins, featuredSkins, testimonials, onNavigate }: HomePageProps) {
+export function HomePage({ siteContent, latestSkins, featuredSkins, testimonials, onNavigate }: HomePageProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Slides: static welcome slide + one slide per featured pack
@@ -51,16 +52,16 @@ export function HomePage({ latestSkins, featuredSkins, testimonials, onNavigate 
           <div className="relative z-10 h-full flex items-center">
             <div className="text-left px-6 lg:px-16 max-w-3xl">
               <h1 className="mb-4 text-5xl lg:text-7xl font-bold text-white leading-tight tracking-tight">
-                WELCOME TO<br />2K TERRYS MODS
+                {siteContent.heroHeading}
               </h1>
               <p className="text-xl lg:text-2xl text-gray-300 mb-8 max-w-lg">
-                Enhance Your 2K Experience
+                {siteContent.heroSubheading}
               </p>
               <button
                 onClick={() => onNavigate('shop')}
                 className="px-8 py-4 bg-orange-500 hover:bg-orange-600 rounded-lg transition-all flex items-center gap-2 group text-white font-semibold"
               >
-                <span>Browse Mods</span>
+                <span>{siteContent.heroCtaText}</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -214,7 +215,11 @@ export function HomePage({ latestSkins, featuredSkins, testimonials, onNavigate 
       </div>
 
       {/* Testimonials Section */}
-      <TestimonialsSlider testimonials={testimonials} />
+      <TestimonialsSlider
+        heading={siteContent.testimonialsHeading}
+        subheading={siteContent.testimonialsSubheading}
+        testimonials={testimonials}
+      />
 
       {/* Features Section */}
       <div className="bg-gradient-to-b from-orange-500/10 to-transparent py-20">
@@ -224,24 +229,24 @@ export function HomePage({ latestSkins, featuredSkins, testimonials, onNavigate 
               <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Download className="w-8 h-8" />
               </div>
-              <h4 className="mb-2">Instant Download</h4>
-              <p className="text-gray-400">Get your skin packs immediately after purchase</p>
+              <h4 className="mb-2">{siteContent.feature1Title}</h4>
+              <p className="text-gray-400">{siteContent.feature1Description}</p>
             </div>
 
             <div className="text-center p-8 rounded-2xl bg-slate-900/50 backdrop-blur border border-orange-500/20">
               <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Star className="w-8 h-8" />
               </div>
-              <h4 className="mb-2">HD Cyberfaces</h4>
-              <p className="text-gray-400">Realistic player faces crafted with attention to detail</p>
+              <h4 className="mb-2">{siteContent.feature2Title}</h4>
+              <p className="text-gray-400">{siteContent.feature2Description}</p>
             </div>
 
             <div className="text-center p-8 rounded-2xl bg-slate-900/50 backdrop-blur border border-orange-500/20">
               <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <ArrowRight className="w-8 h-8" />
               </div>
-              <h4 className="mb-2">Easy Installation</h4>
-              <p className="text-gray-400">Simple setup guides included with every pack</p>
+              <h4 className="mb-2">{siteContent.feature3Title}</h4>
+              <p className="text-gray-400">{siteContent.feature3Description}</p>
             </div>
           </div>
         </div>

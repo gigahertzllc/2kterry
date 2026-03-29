@@ -38,3 +38,44 @@ export interface Testimonial {
   approved?: boolean;
   createdAt: string;
 }
+
+export interface SiteContent {
+  // Hero Section
+  heroHeading: string;
+  heroSubheading: string;
+  heroCtaText: string;
+  heroImagePath: string;
+
+  // About Page
+  aboutHeading: string;
+  aboutText: string;
+
+  // Donation Page
+  donationHeading: string;
+  donationText: string;
+  donationUrl: string;
+  donationButtonText: string;
+
+  // Footer
+  footerBrandName: string;
+  footerDescription: string;
+  footerCopyright: string;
+  footerContactEmail: string;
+  footerRefundPolicy: string;
+  footerDiscordUrl: string;
+  footerDiscordText: string;
+  footerDonationUrl: string;
+  footerDonationText: string;
+
+  // Features Section (3 cards)
+  feature1Title: string;
+  feature1Description: string;
+  feature2Title: string;
+  feature2Description: string;
+  feature3Title: string;
+  feature3Description: string;
+
+  // Testimonials Section
+  testimonialsHeading: string;
+  testimonialsSubheading: string;
+}

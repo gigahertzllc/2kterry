@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Package, Users, ShoppingCart, Settings as SettingsIcon, MessageSquare } from 'lucide-react';
+import { Package, Users, ShoppingCart, Settings as SettingsIcon, MessageSquare, Globe } from 'lucide-react';
 import { Game, SkinPack } from '../types';
 import { SkinPacksTab } from './dashboard/SkinPacksTab';
 import { CustomersTab } from './dashboard/CustomersTab';
 import { OrdersTab } from './dashboard/OrdersTab';
 import { SettingsTab } from './dashboard/SettingsTab';
 import { TestimonialsTab } from './dashboard/TestimonialsTab';
+import { SiteContentTab } from './dashboard/SiteContentTab';
 
 interface DashboardPageProps {
   games: Game[];
@@ -15,7 +16,7 @@ interface DashboardPageProps {
   onDeleteSkinPack: (id: string) => void;
 }
 
-type TabType = 'skinpacks' | 'customers' | 'orders' | 'testimonials' | 'settings';
+type TabType = 'skinpacks' | 'customers' | 'orders' | 'testimonials' | 'site-content' | 'settings';
 
 export function DashboardPage({ games, skinPacks, onAddSkinPack, onUpdateSkinPack, onDeleteSkinPack }: DashboardPageProps) {
   const [activeTab, setActiveTab] = useState<TabType>('skinpacks');
@@ -25,6 +26,7 @@ export function DashboardPage({ games, skinPacks, onAddSkinPack, onUpdateSkinPac
     { id: 'customers' as TabType, label: 'Customers', icon: Users },
     { id: 'orders' as TabType, label: 'Orders', icon: ShoppingCart },
     { id: 'testimonials' as TabType, label: 'Testimonials', icon: MessageSquare },
+    { id: 'site-content' as TabType, label: 'Site Content', icon: Globe },
     { id: 'settings' as TabType, label: 'Settings', icon: SettingsIcon },
   ];
 
@@ -74,12 +76,14 @@ export function DashboardPage({ games, skinPacks, onAddSkinPack, onUpdateSkinPac
             onDeleteSkinPack={onDeleteSkinPack}
           />
         )}
-        
+
         {activeTab === 'customers' && <CustomersTab />}
-        
+
         {activeTab === 'orders' && <OrdersTab skinPacks={skinPacks} />}
 
         {activeTab === 'testimonials' && <TestimonialsTab />}
+
+        {activeTab === 'site-content' && <SiteContentTab />}
 
         {activeTab === 'settings' && <SettingsTab />}
       </div>

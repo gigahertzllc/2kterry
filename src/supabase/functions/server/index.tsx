@@ -984,4 +984,68 @@ app.post("/make-server-832015f7/skin-packs/:id/download", async (c) => {
   }
 });
 
+// Site Content API
+app.get("/make-server-832015f7/site-content", async (c) => {
+  try {
+    const content = await kv.get('site-content');
+
+    if (!content) {
+      // Return default content if not set
+      return c.json({
+        content: {
+          heroHeading: 'WELCOME TO\n2K TERRYS MODS',
+          heroSubheading: 'Enhance Your 2K Experience',
+          heroCtaText: 'Browse Mods',
+          heroImagePath: '/images/brand/hero.jpg',
+          aboutHeading: 'About 2K Terry\'s Mods',
+          aboutText: '2K Terry\'s Mods is a community-driven platform dedicated to providing premium NBA 2K mods. From HD cyberfaces to custom courts and roster updates, we craft the highest quality modifications for the serious 2K community. Our mods enhance your gaming experience with attention to detail and realistic aesthetics.',
+          donationHeading: 'Support 2K Terry\'s Mods',
+          donationText: 'Love our mods? Consider supporting the project to help us continue creating premium content for the NBA 2K community. Your donation helps fund development, server costs, and enables us to bring you more amazing mods.',
+          donationUrl: 'https://buymeacoffee.com/2kterrysmods',
+          donationButtonText: 'Donate Now',
+          footerBrandName: '2kTerrysMods',
+          footerDescription: 'Premium NBA 2K mods — cyberfaces, jerseys, courts, and more.',
+          footerCopyright: '© Copyright 2026 All Rights Reserved.',
+          footerContactEmail: 'team@gigahertzcompany.com',
+          footerRefundPolicy: 'All sales are final. No refunds.',
+          footerDiscordUrl: 'https://discord.gg/fmx8F4Ue',
+          footerDiscordText: 'Leave your Comments in the Discord',
+          footerDonationUrl: 'https://buymeacoffee.com/2kterrysmods',
+          footerDonationText: 'Support Us',
+          feature1Title: 'HD Cyberfaces',
+          feature1Description: 'High-definition player faces with realistic details and textures.',
+          feature2Title: 'Custom Courts',
+          feature2Description: 'Beautifully designed custom courts and arenas for immersive gameplay.',
+          feature3Title: 'Roster Updates',
+          feature3Description: 'Keep your game current with the latest roster changes and updates.',
+          testimonialsHeading: 'What Modders Are Saying',
+          testimonialsSubheading: 'Join thousands of satisfied modders'
+        }
+      });
+    }
+
+    return c.json({ content });
+  } catch (error) {
+    console.error('Error fetching site content:', error);
+    return c.json({ error: 'Failed to fetch site content' }, 500);
+  }
+});
+
+app.put("/make-server-832015f7/site-content", async (c) => {
+  try {
+    const content = await c.req.json();
+
+    if (!content) {
+      return c.json({ error: 'Content is required' }, 400);
+    }
+
+    await kv.set('site-content', content);
+
+    return c.json({ success: true, content });
+  } catch (error) {
+    console.error('Error updating site content:', error);
+    return c.json({ error: 'Failed to update site content' }, 500);
+  }
+});
+
 Deno.serve(app.fetch);

@@ -3,9 +3,11 @@ import { Star, Quote } from 'lucide-react';
 
 interface TestimonialsSliderProps {
   testimonials: Testimonial[];
+  heading?: string;
+  subheading?: string;
 }
 
-export function TestimonialsSlider({ testimonials }: TestimonialsSliderProps) {
+export function TestimonialsSlider({ testimonials, heading = 'What Modders Are Saying', subheading = 'Join thousands of satisfied modders' }: TestimonialsSliderProps) {
   if (!testimonials || testimonials.length === 0) {
     return null;
   }
@@ -28,8 +30,8 @@ export function TestimonialsSlider({ testimonials }: TestimonialsSliderProps) {
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="mb-16 text-center">
-          <h2 className="mb-2">What Modders Are Saying</h2>
-          <p className="text-gray-400">Join thousands of satisfied modders</p>
+          <h2 className="mb-2">{heading}</h2>
+          <p className="text-gray-400">{subheading}</p>
         </div>
 
         {/* Testimonials Slider Container */}
