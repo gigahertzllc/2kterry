@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { ArrowLeft, Download, Star, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SkinPack } from '../types';
 import { toast } from 'sonner';
+import { trackDownload } from '../utils/api';
 
 interface SkinDetailPageProps {
   skin: SkinPack;
   onNavigate: (page: string) => void;
+  onDownloadTracked?: (skinPackId: string, newCount: number) => void;
 }
 
-export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
+export function SkinDetailPage({ skin, onNavigate, onDownloadTracked }: SkinDetailPageProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [downloadCount, setDownloadCount] = useState(skin.downloads);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % skin.images.length);
@@ -20,11 +23,17 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
     setCurrentImageIndex((prev) => (prev - 1 + skin.images.length) % skin.images.length);
   };
 
-  const handleCheckout = () => {
-    // Free mods: Direct download
+  const handleCheckout = async () => {
+    // Free mods: Direct download + track
     if (skin.price === 0) {
       if (skin.downloadUrl) {
         window.open(skin.downloadUrl, '_blank');
+        // Track the download (non-blocking)
+        const result = await trackDownload(skin.id);
+        if (result.success) {
+          setDownloadCount(result.downloads);
+          onDownloadTracked?.(skin.id, result.downloads);
+        }
       } else {
         toast.info('Download link coming soon!');
       }
@@ -34,6 +43,8 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
     // Paid mods: Stripe Payment Link
     if (skin.stripePaymentLink) {
       window.open(skin.stripePaymentLink, '_blank');
+      // Note: paid downloads are tracked by the Stripe webhook on payment completion.
+      // No client-side tracking needed here — the webhook handles it.
     } else {
       toast.info('This mod will be available for purchase soon!');
     }
@@ -132,7 +143,7 @@ export function SkinDetailPage({ skin, onNavigate }: SkinDetailPageProps) {
                 <div className="flex items-center gap-6 mb-6 text-gray-400">
                   <div className="flex items-center gap-2">
                     <Download className="w-5 h-5" />
-                    <span>{skin.downloads.toLocaleString()} downloads</span>
+                    <span>{downloadCount.toLocaleString()} downloads</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />

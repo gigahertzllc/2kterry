@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CheckCircle, Download, ArrowLeft } from 'lucide-react';
 import { SkinPack } from '../types';
+import { trackDownload } from '../utils/api';
 
 interface CheckoutSuccessProps {
   skinPack?: SkinPack;
@@ -10,17 +11,26 @@ interface CheckoutSuccessProps {
 
 export function CheckoutSuccess({ skinPack, sessionId, onNavigate }: CheckoutSuccessProps) {
   const [isVerifying, setIsVerifying] = useState(!!sessionId);
+  const trackedRef = useRef(false);
 
   useEffect(() => {
     if (sessionId) {
-      // In a real app, you'd verify the session with your backend
-      // For now, just mark as verified after a brief delay
       const timer = setTimeout(() => {
         setIsVerifying(false);
       }, 1000);
       return () => clearTimeout(timer);
     }
   }, [sessionId]);
+
+  // Track the paid download once when the success page loads
+  useEffect(() => {
+    if (skinPack && !trackedRef.current) {
+      trackedRef.current = true;
+      trackDownload(skinPack.id).catch(() => {
+        // Non-blocking — webhook is the primary tracker for paid downloads
+      });
+    }
+  }, [skinPack]);
 
   const downloadUrl = skinPack?.downloadUrl || '/';
 

@@ -320,8 +320,8 @@ async function handleCheckoutSessionCompleted(
       amount
     );
 
-    // Increment download count
-    await incrementSkinPackDownloads(skinPackId);
+    // Note: download count is incremented by the frontend via /api/track-download
+    // when the user lands on the checkout success page. This avoids double-counting.
 
     console.log('Checkout session completed:', {
       customerId,

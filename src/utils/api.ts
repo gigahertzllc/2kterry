@@ -472,6 +472,29 @@ export async function createCheckoutSession(params: {
   return { sessionId: data.sessionId, clientSecret: data.clientSecret };
 }
 
+// Download Tracking API (Vercel serverless function — works independently of edge function)
+export async function trackDownload(skinPackId: string): Promise<{ success: boolean; downloads: number }> {
+  try {
+    const response = await fetch('/api/track-download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ skinPackId }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Track download failed:', errorData);
+      return { success: false, downloads: 0 };
+    }
+
+    return await response.json();
+  } catch (error) {
+    // Non-blocking — don't let tracking failure break the user's download
+    console.error('Error tracking download:', error);
+    return { success: false, downloads: 0 };
+  }
+}
+
 // Testimonials API
 export async function getTestimonials(): Promise<{ testimonials: Testimonial[] }> {
   try {

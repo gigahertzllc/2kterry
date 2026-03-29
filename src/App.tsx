@@ -239,7 +239,17 @@ export default function App() {
       )}
 
       {currentPage === 'skin' && selectedSkin && (
-        <SkinDetailPage skin={selectedSkin} onNavigate={handleNavigate} />
+        <SkinDetailPage
+          skin={selectedSkin}
+          onNavigate={handleNavigate}
+          onDownloadTracked={(skinPackId, newCount) => {
+            setSkinPacks((prev) =>
+              prev.map((sp) =>
+                sp.id === skinPackId ? { ...sp, downloads: newCount } : sp
+              )
+            );
+          }}
+        />
       )}
 
       {currentPage === 'checkout/success' && (
