@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
+import { sendReceiptEmail } from './send-receipt';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2023-10-16' as any,
@@ -225,6 +226,62 @@ async function incrementSkinPackDownloads(skinPackId: string): Promise<void> {
   }
 }
 
+async function createDownloadToken(
+  orderId: string,
+  skinPackId: string,
+  skinPackName: string,
+  customerEmail: string
+): Promise<string> {
+  try {
+    // Look up the skin pack to get its r2Key
+    const { data, error: fetchError } = await supabase
+      .from('kv_store_832015f7')
+      .select('value')
+      .eq('key', `skinpack:${skinPackId}`)
+      .single();
+
+    if (fetchError || !data) {
+      console.error('Error fetching skin pack for download token:', fetchError);
+      throw new Error('Skin pack not found');
+    }
+
+    const skinPack = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+    const r2Key = skinPack.r2Key || '';
+
+    // Generate a unique download token
+    const token = randomUUID();
+
+    const tokenData = {
+      token,
+      orderId,
+      skinPackId,
+      skinPackName,
+      customerEmail,
+      r2Key,
+      createdAt: new Date().toISOString(),
+      lastDownloadedAt: null,
+    };
+
+    const { error: insertError } = await supabase
+      .from('kv_store_832015f7')
+      .insert({
+        key: `download-token:${token}`,
+        value: tokenData,
+      });
+
+    if (insertError) {
+      console.error('Error creating download token:', insertError);
+      throw insertError;
+    }
+
+    console.log(`Download token created: ${token.slice(0, 8)}... for order ${orderId}`);
+    return token;
+  } catch (error) {
+    console.error('Error in createDownloadToken:', error);
+    throw error;
+  }
+}
+
 async function resolveMetadata(
   session: Stripe.Checkout.Session
 ): Promise<{ skinPackId: string; skinPackName: string }> {
@@ -311,7 +368,7 @@ async function handleCheckoutSessionCompleted(
     );
 
     // Create order
-    await createOrder(
+    const orderId = await createOrder(
       customerId,
       customerName || 'Customer',
       customerEmail,
@@ -323,10 +380,44 @@ async function handleCheckoutSessionCompleted(
     // Note: download count is incremented by the frontend via /api/track-download
     // when the user lands on the checkout success page. This avoids double-counting.
 
+    // Create a permanent download token for this order
+    let downloadToken = '';
+    try {
+      downloadToken = await createDownloadToken(
+        orderId,
+        skinPackId,
+        skinPackName || 'Unknown Skin Pack',
+        customerEmail
+      );
+    } catch (err) {
+      console.error('Failed to create download token (non-fatal):', err);
+    }
+
+    // Send receipt email with download link
+    if (downloadToken && process.env.RESEND_API_KEY) {
+      try {
+        await sendReceiptEmail({
+          customerEmail,
+          customerName: customerName || 'Customer',
+          skinPackName: skinPackName || 'Unknown Skin Pack',
+          amount,
+          orderId,
+          downloadToken,
+        });
+      } catch (err) {
+        // Non-fatal — order is still created even if email fails
+        console.error('Failed to send receipt email (non-fatal):', err);
+      }
+    } else if (!process.env.RESEND_API_KEY) {
+      console.log('RESEND_API_KEY not set — skipping receipt email');
+    }
+
     console.log('Checkout session completed:', {
       customerId,
       customerEmail,
       skinPackId,
+      orderId,
+      downloadToken: downloadToken ? `${downloadToken.slice(0, 8)}...` : 'none',
       amount,
     });
   } catch (error) {

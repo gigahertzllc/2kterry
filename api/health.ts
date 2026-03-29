@@ -13,6 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     stripeWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
     supabaseUrl: !!process.env.SUPABASE_URL,
     supabaseServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    resendApiKey: !!process.env.RESEND_API_KEY,
   };
 
   return res.status(200).json({
@@ -20,5 +21,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     envVarsConfigured: config,
     allR2Ready: config.r2AccountId && config.r2AccessKeyId && config.r2SecretAccessKey,
     webhookReady: config.stripeSecretKey && config.stripeWebhookSecret && config.supabaseServiceRoleKey,
+    emailReady: !!config.resendApiKey,
   });
 }
