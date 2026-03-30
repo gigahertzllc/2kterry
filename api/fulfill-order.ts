@@ -21,10 +21,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   try {
-    const { orderId, skinPackDbId } = req.body;
+    // Accept GET (query params) or POST (body)
+    const orderId = (req.query.orderId as string) || req.body?.orderId;
+    const skinPackDbId = (req.query.skinPackDbId as string) || req.body?.skinPackDbId;
 
     // Get the order
     const { data: orderData, error: orderErr } = await supabase
