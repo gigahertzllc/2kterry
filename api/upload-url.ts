@@ -1,8 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-
-const ADMIN_SECRET = process.env.ADMIN_API_SECRET || '';
+import { validateAdmin, setCorsHeaders } from './_lib/auth';
 
 function getS3Client() {
   return new S3Client({
@@ -16,17 +15,14 @@ function getS3Client() {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCorsHeaders(req, res, 'POST, OPTIONS');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Simple admin auth
-  const auth = req.headers.authorization?.replace('Bearer ', '');
-  if (auth !== ADMIN_SECRET) {
+  // Validate admin via Supabase JWT
+  const admin = await validateAdmin(req);
+  if (!admin) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -71,6 +67,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error: any) {
     console.error('Upload URL error:', error);
-    return res.status(500).json({ error: error.message || 'Failed to generate upload URL' });
+    return res.status(500).json({ error: 'Failed to generate upload URL' });
   }
 }

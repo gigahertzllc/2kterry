@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { validateAdmin, setCorsHeaders } from './_lib/auth';
 
-const ADMIN_SECRET = process.env.ADMIN_API_SECRET || '';
 const KV_TABLE = 'kv_store_832015f7';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -32,15 +32,14 @@ function resolveImageUrl(imagePath: string): string {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCorsHeaders(req, res, 'POST, OPTIONS');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const auth = req.headers.authorization?.replace('Bearer ', '');
-  if (auth !== ADMIN_SECRET) {
+  // Validate admin via Supabase JWT
+  const admin = await validateAdmin(req);
+  if (!admin) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -66,7 +65,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       try {
-        // Build the full public image URL
         const imageUrl = resolveImageUrl(pack.thumbnail || (pack.images && pack.images[0]) || '');
 
         const updateData: Stripe.ProductUpdateParams = {
@@ -74,7 +72,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           description: pack.description || undefined,
         };
 
-        // Stripe requires images to be valid https URLs
         if (imageUrl && imageUrl.startsWith('https://')) {
           updateData.images = [imageUrl];
         }
@@ -104,6 +101,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error: any) {
     console.error('Sync error:', error);
-    return res.status(500).json({ error: error.message || 'Failed to sync products' });
+    return res.status(500).json({ error: 'Failed to sync products' });
   }
 }

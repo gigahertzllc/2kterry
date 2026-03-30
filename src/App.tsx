@@ -157,6 +157,11 @@ export default function App() {
     setShowAdminLogin(false);
     setCurrentPage('dashboard');
 
+    // Store the Supabase JWT for authenticated API calls
+    if (session?.access_token) {
+      api.setAdminToken(session.access_token);
+    }
+
     // Reload from DB
     try {
       const allPacks = await loadPacks();

@@ -33,8 +33,8 @@ function getR2Client() {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS — public endpoint, customer-facing redirect
+  res.setHeader('Access-Control-Allow-Origin', 'https://2kterrysmods.com');
 
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });

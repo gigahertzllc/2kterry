@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
-
-const ADMIN_SECRET = process.env.ADMIN_API_SECRET || '';
+import { validateAdmin, setCorsHeaders } from './_lib/auth';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -13,17 +12,14 @@ function getStripe() {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCorsHeaders(req, res, 'POST, OPTIONS');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Simple admin auth
-  const auth = req.headers.authorization?.replace('Bearer ', '');
-  if (auth !== ADMIN_SECRET) {
+  // Validate admin via Supabase JWT
+  const admin = await validateAdmin(req);
+  if (!admin) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -53,7 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 2. Create a Price for the product
     const stripePrice = await stripe.prices.create({
       product: product.id,
-      unit_amount: Math.round(price * 100), // Stripe uses cents
+      unit_amount: Math.round(price * 100),
       currency: 'usd',
     });
 
@@ -88,6 +84,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   } catch (error: any) {
     console.error('Create product error:', error);
-    return res.status(500).json({ error: error.message || 'Failed to create Stripe product' });
+    return res.status(500).json({ error: 'Failed to create Stripe product' });
   }
 }

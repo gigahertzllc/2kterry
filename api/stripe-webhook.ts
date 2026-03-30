@@ -477,6 +477,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Invalid webhook signature' });
     }
 
+    // Idempotency: check if we've already processed this event
+    const eventKey = `webhook-event:${event.id}`;
+    const { data: existingEvent } = await supabase
+      .from('kv_store_832015f7')
+      .select('key')
+      .eq('key', eventKey)
+      .single();
+
+    if (existingEvent) {
+      console.log(`Skipping duplicate event: ${event.id}`);
+      return res.status(200).json({ received: true, duplicate: true });
+    }
+
+    // Mark event as processed before handling (prevents race conditions)
+    await supabase.from('kv_store_832015f7').insert({
+      key: eventKey,
+      value: { eventId: event.id, type: event.type, processedAt: new Date().toISOString() },
+    });
+
     // Handle specific event types
     switch (event.type) {
       case 'checkout.session.completed':

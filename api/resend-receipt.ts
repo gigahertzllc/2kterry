@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { sendReceiptEmail } from './send-receipt';
+import { validateAdmin, setCorsHeaders } from './_lib/auth';
 
 /**
  * POST /api/resend-receipt
@@ -10,8 +11,6 @@ import { sendReceiptEmail } from './send-receipt';
  * and re-sends the receipt email to the customer.
  */
 
-const ADMIN_SECRET = process.env.ADMIN_API_SECRET || '';
-
 function getSupabase() {
   const url = process.env.SUPABASE_URL || 'https://dxquofsanirdfonsnrqu.supabase.co';
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -20,15 +19,14 @@ function getSupabase() {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCorsHeaders(req, res, 'POST, OPTIONS');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const auth = req.headers.authorization?.replace('Bearer ', '');
-  if (auth !== ADMIN_SECRET) {
+  // Validate admin via Supabase JWT
+  const admin = await validateAdmin(req);
+  if (!admin) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -115,6 +113,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ success: true, message: `Receipt re-sent to ${order.customerEmail}` });
   } catch (err: any) {
     console.error('Resend receipt error:', err);
-    return res.status(500).json({ error: err.message || 'Failed to resend receipt' });
+    return res.status(500).json({ error: 'Failed to resend receipt' });
   }
 }

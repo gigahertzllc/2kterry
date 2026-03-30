@@ -7,7 +7,7 @@ import { UploadProgress } from '../ui/UploadProgress';
 import { ConfirmationModal } from '../ui/ConfirmationModal';
 import { uploadFileWithProgress, validateFile, formatFileSize } from '../../utils/storage';
 
-const ADMIN_SECRET = import.meta.env.VITE_ADMIN_API_SECRET || '';
+// Admin token is now set dynamically after login via api.setAdminToken()
 
 interface SkinPacksTabProps {
   games: Game[];
@@ -24,7 +24,7 @@ async function uploadToR2(file: File, onProgress?: (progress: number) => void): 
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${ADMIN_SECRET}`,
+      'Authorization': `Bearer ${api.getAdminToken()}`,
     },
     body: JSON.stringify({
       filename: file.name,
@@ -82,7 +82,7 @@ async function createStripeProduct(data: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${ADMIN_SECRET}`,
+      'Authorization': `Bearer ${api.getAdminToken()}`,
     },
     body: JSON.stringify(data),
   });

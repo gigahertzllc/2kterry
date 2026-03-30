@@ -96,10 +96,13 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
     }
   };
 
-  const handleViewInvoice = (orderId: string) => {
+  const handleViewInvoice = async (orderId: string) => {
     setActiveMenu(null);
-    const url = api.getInvoiceUrl(orderId);
-    window.open(url, '_blank');
+    try {
+      await api.openInvoice(orderId);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to load invoice');
+    }
   };
 
   const handleSendInvoice = async (orderId: string) => {

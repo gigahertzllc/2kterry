@@ -1,14 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { validateAdmin, setCorsHeaders } from './_lib/auth';
 
 /**
- * GET  /api/invoice?orderId=xxx         → Returns PDF invoice for download
+ * GET  /api/invoice?orderId=xxx         → Returns HTML invoice for browser viewing/printing
  * POST /api/invoice  { orderId: string } → Sends invoice to customer via Resend
  *
- * Both require admin auth via Authorization header.
+ * Both require admin auth via Authorization header (Supabase JWT).
  */
-
-const ADMIN_SECRET = process.env.ADMIN_API_SECRET || '';
 
 function getSupabase() {
   const url = process.env.SUPABASE_URL || 'https://dxquofsanirdfonsnrqu.supabase.co';
@@ -123,15 +122,13 @@ function generateInvoiceHtml(order: any): string {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  setCorsHeaders(req, res, 'GET, POST, OPTIONS');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // Accept auth from header or query param (GET needs query since window.open can't set headers)
-  const auth = req.headers.authorization?.replace('Bearer ', '') || (req.query.auth as string);
-  if (auth !== ADMIN_SECRET) {
+  // Validate admin via Supabase JWT — header only, no query param auth
+  const admin = await validateAdmin(req);
+  if (!admin) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -190,6 +187,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (err: any) {
     console.error('Invoice error:', err);
-    return res.status(500).json({ error: err.message || 'Failed to process invoice' });
+    return res.status(500).json({ error: 'Failed to process invoice' });
   }
 }
