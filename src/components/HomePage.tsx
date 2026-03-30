@@ -76,23 +76,14 @@ export function HomePage({ siteContent, latestSkins, featuredSkins, testimonials
               key={skin.id}
               className={`absolute inset-0 transition-opacity duration-1000 ${currentSlide === slideIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             >
-              {/* Background — use first gallery image or thumbnail */}
+              {/* Cover image */}
               <img
-                src={skin.images?.[1] || skin.thumbnail}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover"
+                src={skin.thumbnail}
+                alt={skin.name}
+                className="absolute inset-0 w-full h-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-transparent to-slate-950"></div>
-
-              {/* Main pack image */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <img
-                  src={skin.thumbnail}
-                  alt={skin.name}
-                  className="w-full h-full object-contain object-center max-w-5xl"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-slate-950/40"></div>
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/40 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
 
               {/* Text overlay */}
               <div className="relative z-10 h-full flex items-end pb-32">
