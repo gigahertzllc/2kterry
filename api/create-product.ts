@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
-import { validateAdmin, setCorsHeaders } from './_lib/auth';
+import { validateAdmin, setCorsHeaders } from './_lib/auth.js';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { validateAdmin, setCorsHeaders } from './_lib/auth';
+import { validateAdmin, setCorsHeaders } from './_lib/auth.js';
 
 /**
  * GET  /api/invoice?orderId=xxx         → Returns HTML invoice for browser viewing/printing

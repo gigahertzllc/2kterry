@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { validateAdmin, setCorsHeaders } from './_lib/auth';
+import { validateAdmin, setCorsHeaders } from './_lib/auth.js';
 
 function getS3Client() {
   return new S3Client({

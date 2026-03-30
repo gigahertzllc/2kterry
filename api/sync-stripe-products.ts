@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-import { validateAdmin, setCorsHeaders } from './_lib/auth';
+import { validateAdmin, setCorsHeaders } from './_lib/auth.js';
 
 const KV_TABLE = 'kv_store_832015f7';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
