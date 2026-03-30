@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil, CheckCircle2, AlertCircle, Cloud, Loader2, Eye, EyeOff, GripVertical } from 'lucide-react';
+import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil, CheckCircle2, AlertCircle, Cloud, Loader2, Eye, EyeOff, GripVertical, RefreshCw } from 'lucide-react';
 import { Game, SkinPack } from '../../types';
 import * as api from '../../utils/api';
 import { toast } from 'sonner';
@@ -125,6 +125,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
   const [submitStep, setSubmitStep] = useState('');
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -248,7 +249,13 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
             name: formData.name,
             description: formData.description,
             price,
-            imageUrl: imagesToStore[0] || undefined,
+            imageUrl: (() => {
+              const img = imagesToStore[0];
+              if (!img) return undefined;
+              // If already a full URL, use as-is; otherwise build the Supabase public URL
+              if (img.startsWith('http')) return img;
+              return `https://dxquofsanirdfonsnrqu.supabase.co/storage/v1/object/public/make-832015f7-images/${img}`;
+            })(),
             downloadUrl,
             r2Key: modFileR2Key || undefined,
             skinPackId: editingSkinPack?.id || Date.now().toString(),
@@ -390,6 +397,18 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     dragOverItem.current = null;
   };
 
+  const handleSyncStripe = async () => {
+    setIsSyncing(true);
+    try {
+      const result = await api.syncStripeProducts();
+      toast.success(`Synced ${result.synced} of ${result.total} products to Stripe`);
+    } catch (error) {
+      toast.error(`Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleDeleteClick = (skinId: string) => {
     setDeleteTargetId(skinId);
     setShowDeleteConfirm(true);
@@ -420,13 +439,24 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
           <h2 className="text-2xl mb-2">Skin Pack Management</h2>
           <p className="text-gray-400">Create, edit, and manage your skin packs</p>
         </div>
-        <button
-          onClick={() => setShowUploadModal(true)}
-          className="px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center gap-3"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Create New Pack</span>
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleSyncStripe}
+            disabled={isSyncing}
+            className="px-5 py-4 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition-all flex items-center gap-2 text-sm disabled:opacity-50"
+            title="Sync all product images & descriptions to Stripe checkout pages"
+          >
+            <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>{isSyncing ? 'Syncing...' : 'Sync to Stripe'}</span>
+          </button>
+          <button
+            onClick={() => setShowUploadModal(true)}
+            className="px-6 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center gap-3"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Create New Pack</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}

@@ -518,6 +518,25 @@ export async function sendInvoice(orderId: string): Promise<{ success: boolean; 
   return await response.json();
 }
 
+// Admin: Sync all skin pack images & descriptions to Stripe products
+export async function syncStripeProducts(): Promise<{ success: boolean; synced: number; total: number; results: any[] }> {
+  const adminToken = localStorage.getItem('adminToken') || '';
+  const response = await fetch('/api/sync-stripe-products', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${adminToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to sync products');
+  }
+
+  return await response.json();
+}
+
 // Download Tracking API (Vercel serverless function — works independently of edge function)
 export async function trackDownload(skinPackId: string): Promise<{ success: boolean; downloads: number }> {
   try {
