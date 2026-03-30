@@ -3,6 +3,7 @@ import { Game, SkinPack, Testimonial, SiteContent } from '../types';
 import { defaultSiteContent } from '../data/defaultSiteContent';
 
 const API_URL = `https://${projectId}.supabase.co/functions/v1/make-server-832015f7`;
+const ADMIN_SECRET = import.meta.env.VITE_ADMIN_API_SECRET || '';
 
 // Pattern: the edge function wrongly converts local paths like /images/brand/foo.jpg
 // into Supabase storage URLs. This regex catches those and extracts the original path.
@@ -474,7 +475,7 @@ export async function createCheckoutSession(params: {
 
 // Admin: Resend receipt email to customer
 export async function resendReceipt(orderId: string): Promise<{ success: boolean; message: string }> {
-  const adminToken = localStorage.getItem('adminToken') || '';
+  const adminToken = ADMIN_SECRET;
   const response = await fetch('/api/resend-receipt', {
     method: 'POST',
     headers: {
@@ -494,13 +495,13 @@ export async function resendReceipt(orderId: string): Promise<{ success: boolean
 
 // Admin: Get invoice HTML (opens in new tab for print/save as PDF)
 export function getInvoiceUrl(orderId: string): string {
-  const adminToken = localStorage.getItem('adminToken') || '';
+  const adminToken = ADMIN_SECRET;
   return `/api/invoice?orderId=${encodeURIComponent(orderId)}&auth=${encodeURIComponent(adminToken)}`;
 }
 
 // Admin: Send invoice email to customer
 export async function sendInvoice(orderId: string): Promise<{ success: boolean; message: string }> {
-  const adminToken = localStorage.getItem('adminToken') || '';
+  const adminToken = ADMIN_SECRET;
   const response = await fetch('/api/invoice', {
     method: 'POST',
     headers: {
@@ -520,7 +521,7 @@ export async function sendInvoice(orderId: string): Promise<{ success: boolean; 
 
 // Admin: Sync all skin pack images & descriptions to Stripe products
 export async function syncStripeProducts(): Promise<{ success: boolean; synced: number; total: number; results: any[] }> {
-  const adminToken = localStorage.getItem('adminToken') || '';
+  const adminToken = ADMIN_SECRET;
   const response = await fetch('/api/sync-stripe-products', {
     method: 'POST',
     headers: {
