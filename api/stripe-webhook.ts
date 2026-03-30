@@ -4,11 +4,17 @@ import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 import { sendReceiptEmail } from './_lib/send-receipt.js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16' as any,
-});
+// Support both live and test Stripe keys
+const LIVE_SECRET = process.env.STRIPE_SECRET_KEY || '';
+const TEST_SECRET = process.env.STRIPE_TEST_SECRET_KEY || '';
+const LIVE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const TEST_WEBHOOK_SECRET = process.env.STRIPE_TEST_WEBHOOK_SECRET || '';
 
-const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const liveStripe = new Stripe(LIVE_SECRET, { apiVersion: '2023-10-16' as any });
+const testStripe = TEST_SECRET ? new Stripe(TEST_SECRET, { apiVersion: '2023-10-16' as any }) : null;
+
+// Will be set per-request based on which secret verifies the signature
+let stripe = liveStripe;
 
 const supabase = createClient(
   process.env.SUPABASE_URL || 'https://dxquofsanirdfonsnrqu.supabase.co',
@@ -459,9 +465,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // Validate webhook secret is configured
-    if (!WEBHOOK_SECRET) {
-      console.error('STRIPE_WEBHOOK_SECRET not configured');
+    // Validate at least one webhook secret is configured
+    if (!LIVE_WEBHOOK_SECRET && !TEST_WEBHOOK_SECRET) {
+      console.error('No STRIPE_WEBHOOK_SECRET configured (live or test)');
       return res.status(500).json({ error: 'Webhook not configured' });
     }
 
@@ -475,13 +481,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Missing stripe-signature header' });
     }
 
-    // Verify webhook signature
+    // Verify webhook signature — try live first, then test
     let event: Stripe.Event;
+    let isTestMode = false;
     try {
-      event = stripe.webhooks.constructEvent(rawBody, signature, WEBHOOK_SECRET);
-    } catch (signatureError: any) {
-      console.error('Webhook signature verification failed:', signatureError.message);
-      return res.status(400).json({ error: 'Invalid webhook signature' });
+      event = liveStripe.webhooks.constructEvent(rawBody, signature, LIVE_WEBHOOK_SECRET);
+      stripe = liveStripe;
+    } catch {
+      // Live verification failed — try test secret
+      if (TEST_WEBHOOK_SECRET && testStripe) {
+        try {
+          event = testStripe.webhooks.constructEvent(rawBody, signature, TEST_WEBHOOK_SECRET);
+          stripe = testStripe;
+          isTestMode = true;
+          console.log('Processing TEST mode webhook event');
+        } catch (testErr: any) {
+          console.error('Webhook signature verification failed for both live and test:', testErr.message);
+          return res.status(400).json({ error: 'Invalid webhook signature' });
+        }
+      } else {
+        console.error('Webhook signature verification failed (no test secret configured)');
+        return res.status(400).json({ error: 'Invalid webhook signature' });
+      }
     }
 
     // Idempotency: check if we've already processed this event
