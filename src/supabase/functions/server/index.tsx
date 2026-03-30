@@ -44,11 +44,16 @@ async function ensureStorageIsPublic() {
 // Enable logger
 app.use('*', logger(console.log));
 
-// Enable CORS for all routes and methods
+// Enable CORS — locked to trusted origins only
 app.use(
   "/*",
   cors({
-    origin: "*",
+    origin: (origin) => {
+      const allowed = ['https://2kterrysmods.com', 'https://www.2kterrysmods.com'];
+      if (!origin) return 'https://2kterrysmods.com';
+      if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) return origin;
+      return allowed.includes(origin) ? origin : 'https://2kterrysmods.com';
+    },
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
@@ -61,8 +66,8 @@ app.get("/make-server-832015f7/health", (c) => {
   return c.json({ status: "ok" });
 });
 
-// DIAGNOSTIC: Check storage bucket status
-app.get("/make-server-832015f7/admin/check-storage", async (c) => {
+// DIAGNOSTIC: Check storage bucket status (admin only)
+app.get("/make-server-832015f7/admin/check-storage", requireAdmin, async (c) => {
   try {
     const { data: buckets } = await supabase.storage.listBuckets();
     
@@ -100,7 +105,7 @@ app.get("/make-server-832015f7/admin/check-storage", async (c) => {
 });
 
 // ADMIN: Force fix storage buckets
-app.post("/make-server-832015f7/admin/fix-storage", async (c) => {
+app.post("/make-server-832015f7/admin/fix-storage", requireAdmin, async (c) => {
   try {
     console.log('=== FORCING STORAGE FIX ===');
     
@@ -159,7 +164,7 @@ app.post("/make-server-832015f7/admin/fix-storage", async (c) => {
 });
 
 // ADMIN: Migrate existing products to use public URLs
-app.post("/make-server-832015f7/admin/migrate-to-public-urls", async (c) => {
+app.post("/make-server-832015f7/admin/migrate-to-public-urls", requireAdmin, async (c) => {
   try {
     console.log('Starting migration to public URLs...');
     
@@ -206,7 +211,7 @@ app.post("/make-server-832015f7/admin/migrate-to-public-urls", async (c) => {
 });
 
 // ADMIN: Export all products as JSON backup
-app.get("/make-server-832015f7/admin/export-products", async (c) => {
+app.get("/make-server-832015f7/admin/export-products", requireAdmin, async (c) => {
   try {
     const skinPacks = await kv.getByPrefix('skinpack:');
     const games = await kv.getByPrefix('game:');
@@ -227,31 +232,38 @@ app.get("/make-server-832015f7/admin/export-products", async (c) => {
 // Admin authentication endpoints
 
 // First-time admin setup (only works if no admins exist)
+// Requires email, password, and name in the request body
 app.post("/make-server-832015f7/admin/setup", async (c) => {
   try {
-    // Check if any admins exist
+    // Check if any admins exist — if so, block this endpoint entirely
     const existingAdmins = await kv.getByPrefix('admin:');
-    
+
     if (existingAdmins.length > 0) {
       return c.json({ error: 'Admin accounts already exist. Use the dashboard to create new admins.' }, 400);
     }
-    
-    // Create default admin
-    const email = 'admin@2kterrysmods.com';
-    const password = 'TerryMods2025!';
-    const name = 'Terry Johnson';
-    
+
+    // Require credentials in request body — no hardcoded defaults
+    const { email, password, name } = await c.req.json();
+
+    if (!email || !password || !name) {
+      return c.json({ error: 'email, password, and name are required' }, 400);
+    }
+
+    if (password.length < 8) {
+      return c.json({ error: 'Password must be at least 8 characters' }, 400);
+    }
+
     const { data, error } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
       user_metadata: { name, role: 'admin' }
     });
-    
+
     if (error) {
       return c.json({ error: error.message }, 400);
     }
-    
+
     // Store admin info in KV store
     await kv.set(`admin:${data.user.id}`, {
       id: data.user.id,
@@ -260,11 +272,10 @@ app.post("/make-server-832015f7/admin/setup", async (c) => {
       role: 'admin',
       createdAt: new Date().toISOString()
     });
-    
-    return c.json({ 
-      success: true, 
-      message: 'Default admin created',
-      credentials: { email, password }
+
+    return c.json({
+      success: true,
+      message: 'Admin account created. Log in with your credentials.',
     });
   } catch (error) {
     console.error('Error in admin setup:', error);
@@ -272,20 +283,14 @@ app.post("/make-server-832015f7/admin/setup", async (c) => {
   }
 });
 
-// Admin signup (protected - only callable by existing admins or first-time setup)
-app.post("/make-server-832015f7/admin/signup", async (c) => {
+// Admin signup — requires existing admin auth
+app.post("/make-server-832015f7/admin/signup", requireAdmin, async (c) => {
   try {
     const { email, password, name } = await c.req.json();
-    
+
     if (!email || !password || !name) {
       return c.json({ error: 'Email, password, and name are required' }, 400);
     }
-    
-    // Check if any admins exist
-    const existingAdmins = await kv.getByPrefix('admin:');
-    
-    // If admins exist, require authentication (will add later)
-    // For now, allow first admin creation
     
     const { data, error } = await supabase.auth.admin.createUser({
       email,
@@ -378,8 +383,8 @@ app.get("/make-server-832015f7/admin/session", async (c) => {
   }
 });
 
-// Reset admin password
-app.post("/make-server-832015f7/admin/reset-password", async (c) => {
+// Reset admin password (admin only)
+app.post("/make-server-832015f7/admin/reset-password", requireAdmin, async (c) => {
   try {
     const { email, newPassword } = await c.req.json();
     
@@ -416,8 +421,8 @@ app.post("/make-server-832015f7/admin/reset-password", async (c) => {
   }
 });
 
-// Get all admins
-app.get("/make-server-832015f7/admin/list", async (c) => {
+// Get all admins (admin only)
+app.get("/make-server-832015f7/admin/list", requireAdmin, async (c) => {
   try {
     const admins = await kv.getByPrefix('admin:');
     return c.json({ success: true, admins });
@@ -429,8 +434,8 @@ app.get("/make-server-832015f7/admin/list", async (c) => {
 
 // Customer management endpoints
 
-// Create customer
-app.post("/make-server-832015f7/customers", async (c) => {
+// Create customer (admin only — also called by webhook via service role)
+app.post("/make-server-832015f7/customers", requireAdmin, async (c) => {
   try {
     const { name, email, phone } = await c.req.json();
     
@@ -454,8 +459,8 @@ app.post("/make-server-832015f7/customers", async (c) => {
   }
 });
 
-// Get all customers
-app.get("/make-server-832015f7/customers", async (c) => {
+// Get all customers (admin only)
+app.get("/make-server-832015f7/customers", requireAdmin, async (c) => {
   try {
     const customers = await kv.getByPrefix('customer:');
     return c.json({ success: true, customers });
@@ -467,8 +472,8 @@ app.get("/make-server-832015f7/customers", async (c) => {
 
 // Order management endpoints
 
-// Create order
-app.post("/make-server-832015f7/orders", async (c) => {
+// Create order (admin only)
+app.post("/make-server-832015f7/orders", requireAdmin, async (c) => {
   try {
     const { customerId, customerName, customerEmail, skinPackId, skinPackName, amount } = await c.req.json();
     
@@ -502,8 +507,8 @@ app.post("/make-server-832015f7/orders", async (c) => {
   }
 });
 
-// Get all orders
-app.get("/make-server-832015f7/orders", async (c) => {
+// Get all orders (admin only)
+app.get("/make-server-832015f7/orders", requireAdmin, async (c) => {
   try {
     const orders = await kv.getByPrefix('order:');
     // Sort by date descending
@@ -517,8 +522,8 @@ app.get("/make-server-832015f7/orders", async (c) => {
   }
 });
 
-// Update order status
-app.put("/make-server-832015f7/orders/:id", async (c) => {
+// Update order status (admin only)
+app.put("/make-server-832015f7/orders/:id", requireAdmin, async (c) => {
   try {
     const orderId = c.req.param('id');
     const { status } = await c.req.json();
@@ -538,22 +543,33 @@ app.put("/make-server-832015f7/orders/:id", async (c) => {
   }
 });
 
-// Simple admin check middleware
+// JWT-based admin auth middleware — validates Supabase token + admin record
 const requireAdmin = async (c: any, next: any) => {
-  const authHeader = c.req.header('X-Admin-Key');
-  const adminKey = Deno.env.get('ADMIN_KEY') || 'admin123'; // Default for development
-  
-  // For now, allow requests with the anon key (for compatibility)
-  // In production, you should enforce strict admin authentication
-  const isValidAdmin = authHeader === adminKey;
-  
-  if (!isValidAdmin) {
-    console.warn('Unauthorized admin access attempt');
-    // For now, allow through for compatibility - remove this in production
-    // return c.json({ error: 'Unauthorized' }, 401);
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader) {
+    return c.json({ error: 'Unauthorized — no token provided' }, 401);
   }
-  
-  await next();
+
+  const token = authHeader.replace('Bearer ', '');
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) {
+      return c.json({ error: 'Unauthorized — invalid token' }, 401);
+    }
+
+    // Verify user is an admin
+    const adminData = await kv.get(`admin:${user.id}`);
+    if (!adminData) {
+      return c.json({ error: 'Forbidden — not an admin' }, 403);
+    }
+
+    // Attach admin info to context for downstream handlers
+    c.set('admin', adminData);
+    await next();
+  } catch (err) {
+    console.error('Auth middleware error:', err);
+    return c.json({ error: 'Authentication failed' }, 401);
+  }
 };
 
 // Get all games
@@ -567,8 +583,8 @@ app.get("/make-server-832015f7/games", async (c) => {
   }
 });
 
-// Create a new game
-app.post("/make-server-832015f7/games", async (c) => {
+// Create a new game (admin only)
+app.post("/make-server-832015f7/games", requireAdmin, async (c) => {
   try {
     const game = await c.req.json();
     const gameId = `game:${game.id}`;
@@ -697,8 +713,8 @@ app.get("/make-server-832015f7/skin-packs/:id", async (c) => {
   }
 });
 
-// Create a new skin pack
-app.post("/make-server-832015f7/skin-packs", async (c) => {
+// Create a new skin pack (admin only)
+app.post("/make-server-832015f7/skin-packs", requireAdmin, async (c) => {
   try {
     const skinPack = await c.req.json();
     const skinPackId = `skinpack:${skinPack.id}`;
@@ -710,8 +726,8 @@ app.post("/make-server-832015f7/skin-packs", async (c) => {
   }
 });
 
-// Update skin pack
-app.put("/make-server-832015f7/skin-packs/:id", async (c) => {
+// Update skin pack (admin only)
+app.put("/make-server-832015f7/skin-packs/:id", requireAdmin, async (c) => {
   try {
     const id = c.req.param('id');
     const skinPack = await c.req.json();
@@ -723,8 +739,8 @@ app.put("/make-server-832015f7/skin-packs/:id", async (c) => {
   }
 });
 
-// Delete skin pack
-app.delete("/make-server-832015f7/skin-packs/:id", async (c) => {
+// Delete skin pack (admin only)
+app.delete("/make-server-832015f7/skin-packs/:id", requireAdmin, async (c) => {
   try {
     const id = c.req.param('id');
     const skinPack = await kv.get(`skinpack:${id}`);
@@ -765,8 +781,8 @@ app.delete("/make-server-832015f7/skin-packs/:id", async (c) => {
   }
 });
 
-// Upload image
-app.post('/make-server-832015f7/upload-image', async (c) => {
+// Upload image (admin only)
+app.post('/make-server-832015f7/upload-image', requireAdmin, async (c) => {
   try {
     const formData = await c.req.formData();
     const file = formData.get('file') as File;
@@ -804,8 +820,8 @@ app.post('/make-server-832015f7/upload-image', async (c) => {
   }
 });
 
-// Upload skin pack file
-app.post("/make-server-832015f7/upload-file", async (c) => {
+// Upload skin pack file (admin only)
+app.post("/make-server-832015f7/upload-file", requireAdmin, async (c) => {
   try {
     const formData = await c.req.formData();
     const file = formData.get('file') as File;
@@ -885,8 +901,8 @@ app.get("/make-server-832015f7/testimonials", async (c) => {
   }
 });
 
-// Create a new testimonial
-app.post("/make-server-832015f7/testimonials", async (c) => {
+// Create a new testimonial (admin only)
+app.post("/make-server-832015f7/testimonials", requireAdmin, async (c) => {
   try {
     const { customerName, gamertag, content, rating, avatar, featured, approved } = await c.req.json();
 
@@ -916,8 +932,8 @@ app.post("/make-server-832015f7/testimonials", async (c) => {
   }
 });
 
-// Update a testimonial
-app.put("/make-server-832015f7/testimonials/:id", async (c) => {
+// Update a testimonial (admin only)
+app.put("/make-server-832015f7/testimonials/:id", requireAdmin, async (c) => {
   try {
     const id = c.req.param('id');
     const updates = await c.req.json();
@@ -943,8 +959,8 @@ app.put("/make-server-832015f7/testimonials/:id", async (c) => {
   }
 });
 
-// Delete a testimonial
-app.delete("/make-server-832015f7/testimonials/:id", async (c) => {
+// Delete a testimonial (admin only)
+app.delete("/make-server-832015f7/testimonials/:id", requireAdmin, async (c) => {
   try {
     const id = c.req.param('id');
 
@@ -1031,7 +1047,7 @@ app.get("/make-server-832015f7/site-content", async (c) => {
   }
 });
 
-app.put("/make-server-832015f7/site-content", async (c) => {
+app.put("/make-server-832015f7/site-content", requireAdmin, async (c) => {
   try {
     const content = await c.req.json();
 

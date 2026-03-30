@@ -40,10 +40,20 @@ function fixPackImages(pack: SkinPack): SkinPack {
   };
 }
 
+// Public headers — used for read-only operations visible to all users
 const headers = {
   'Authorization': `Bearer ${publicAnonKey}`,
   'Content-Type': 'application/json',
 };
+
+// Admin headers — includes JWT for write operations (set after login)
+function adminHeaders(): Record<string, string> {
+  const token = _adminAccessToken || publicAnonKey;
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+}
 
 // Initialize database with default games if needed
 export async function initializeDatabase() {
@@ -93,7 +103,7 @@ export async function getGames(): Promise<{ games: Game[] }> {
 export async function createGame(game: Game): Promise<Game> {
   const response = await fetch(`${API_URL}/games`, {
     method: 'POST',
-    headers,
+    headers: adminHeaders(),
     body: JSON.stringify(game),
   });
   
@@ -139,7 +149,7 @@ export async function getSkinPack(id: string): Promise<SkinPack | null> {
 export async function createSkinPack(skinPack: SkinPack): Promise<SkinPack> {
   const response = await fetch(`${API_URL}/skin-packs`, {
     method: 'POST',
-    headers,
+    headers: adminHeaders(),
     body: JSON.stringify(skinPack),
   });
   
@@ -155,7 +165,7 @@ export async function createSkinPack(skinPack: SkinPack): Promise<SkinPack> {
 export async function updateSkinPack(skinPack: SkinPack): Promise<SkinPack> {
   const response = await fetch(`${API_URL}/skin-packs/${skinPack.id}`, {
     method: 'PUT',
-    headers,
+    headers: adminHeaders(),
     body: JSON.stringify(skinPack),
   });
   
@@ -171,7 +181,7 @@ export async function updateSkinPack(skinPack: SkinPack): Promise<SkinPack> {
 export async function deleteSkinPack(id: string): Promise<void> {
   const response = await fetch(`${API_URL}/skin-packs/${id}`, {
     method: 'DELETE',
-    headers,
+    headers: adminHeaders(),
   });
   
   if (!response.ok) {
@@ -184,7 +194,7 @@ export async function deleteSkinPack(id: string): Promise<void> {
 export async function migrateToPublicUrls(): Promise<{ message: string; migrated: number; skipped: number }> {
   const response = await fetch(`${API_URL}/admin/migrate-to-public-urls`, {
     method: 'POST',
-    headers,
+    headers: adminHeaders(),
   });
   
   if (!response.ok) {
@@ -199,7 +209,7 @@ export async function migrateToPublicUrls(): Promise<{ message: string; migrated
 // ADMIN: Export all products as backup
 export async function exportProducts(): Promise<any> {
   const response = await fetch(`${API_URL}/admin/export-products`, {
-    headers,
+    headers: adminHeaders(),
   });
   
   if (!response.ok) {
@@ -217,7 +227,7 @@ export async function uploadImage(file: File): Promise<{ path: string; url: stri
   const response = await fetch(`${API_URL}/upload-image`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${publicAnonKey}`,
+      'Authorization': `Bearer ${_adminAccessToken || publicAnonKey}`,
     },
     body: formData,
   });
@@ -238,7 +248,7 @@ export async function uploadSkinPackFile(file: File): Promise<{ path: string }> 
   const response = await fetch(`${API_URL}/upload-file`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${publicAnonKey}`,
+      'Authorization': `Bearer ${_adminAccessToken || publicAnonKey}`,
     },
     body: formData,
   });
@@ -282,7 +292,7 @@ export async function adminSetup() {
 export async function adminSignup(email: string, password: string, name: string) {
   const response = await fetch(`${API_URL}/admin/signup`, {
     method: 'POST',
-    headers,
+    headers: adminHeaders(),
     body: JSON.stringify({ email, password, name }),
   });
   
@@ -330,7 +340,7 @@ export async function getAdminSession(token: string) {
 export async function resetAdminPassword(email: string, newPassword: string) {
   const response = await fetch(`${API_URL}/admin/reset-password`, {
     method: 'POST',
-    headers,
+    headers: adminHeaders(),
     body: JSON.stringify({ email, newPassword }),
   });
   
@@ -370,7 +380,7 @@ export async function checkStorage() {
 export async function fixStorage() {
   const response = await fetch(`${API_URL}/admin/fix-storage`, {
     method: 'POST',
-    headers,
+    headers: adminHeaders(),
   });
   
   if (!response.ok) {
@@ -386,7 +396,7 @@ export async function fixStorage() {
 export async function createCustomer(name: string, email: string, phone?: string) {
   const response = await fetch(`${API_URL}/customers`, {
     method: 'POST',
-    headers,
+    headers: adminHeaders(),
     body: JSON.stringify({ name, email, phone }),
   });
   
@@ -400,7 +410,7 @@ export async function createCustomer(name: string, email: string, phone?: string
 }
 
 export async function getCustomers() {
-  const response = await fetch(`${API_URL}/customers`, { headers });
+  const response = await fetch(`${API_URL}/customers`, { headers: adminHeaders() });
   
   if (!response.ok) {
     throw new Error('Failed to fetch customers');
@@ -421,7 +431,7 @@ export async function createOrder(orderData: {
 }) {
   const response = await fetch(`${API_URL}/orders`, {
     method: 'POST',
-    headers,
+    headers: adminHeaders(),
     body: JSON.stringify(orderData),
   });
   
@@ -435,7 +445,7 @@ export async function createOrder(orderData: {
 }
 
 export async function getOrders() {
-  const response = await fetch(`${API_URL}/orders`, { headers });
+  const response = await fetch(`${API_URL}/orders`, { headers: adminHeaders() });
   
   if (!response.ok) {
     throw new Error('Failed to fetch orders');
@@ -448,7 +458,7 @@ export async function getOrders() {
 export async function updateOrderStatus(orderId: string, status: string) {
   const response = await fetch(`${API_URL}/orders/${orderId}`, {
     method: 'PUT',
-    headers,
+    headers: adminHeaders(),
     body: JSON.stringify({ status }),
   });
 
@@ -614,7 +624,7 @@ export async function createTestimonial(
 ): Promise<any> {
   const response = await fetch(`${API_URL}/testimonials`, {
     method: 'POST',
-    headers,
+    headers: adminHeaders(),
     body: JSON.stringify(testimonial),
   });
 
@@ -633,7 +643,7 @@ export async function updateTestimonial(
 ): Promise<any> {
   const response = await fetch(`${API_URL}/testimonials/${id}`, {
     method: 'PUT',
-    headers,
+    headers: adminHeaders(),
     body: JSON.stringify(data),
   });
 
@@ -648,7 +658,7 @@ export async function updateTestimonial(
 export async function deleteTestimonial(id: string): Promise<void> {
   const response = await fetch(`${API_URL}/testimonials/${id}`, {
     method: 'DELETE',
-    headers,
+    headers: adminHeaders(),
   });
 
   if (!response.ok) {
@@ -675,7 +685,7 @@ export async function getSiteContent(): Promise<SiteContent> {
 export async function updateSiteContent(content: SiteContent): Promise<void> {
   const response = await fetch(`${API_URL}/site-content`, {
     method: 'PUT',
-    headers,
+    headers: adminHeaders(),
     body: JSON.stringify(content),
   });
 
