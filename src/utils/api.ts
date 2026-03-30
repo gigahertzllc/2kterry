@@ -472,6 +472,52 @@ export async function createCheckoutSession(params: {
   return { sessionId: data.sessionId, clientSecret: data.clientSecret };
 }
 
+// Admin: Resend receipt email to customer
+export async function resendReceipt(orderId: string): Promise<{ success: boolean; message: string }> {
+  const adminToken = localStorage.getItem('adminToken') || '';
+  const response = await fetch('/api/resend-receipt', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${adminToken}`,
+    },
+    body: JSON.stringify({ orderId }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to resend receipt');
+  }
+
+  return await response.json();
+}
+
+// Admin: Get invoice HTML (opens in new tab for print/save as PDF)
+export function getInvoiceUrl(orderId: string): string {
+  const adminToken = localStorage.getItem('adminToken') || '';
+  return `/api/invoice?orderId=${encodeURIComponent(orderId)}&auth=${encodeURIComponent(adminToken)}`;
+}
+
+// Admin: Send invoice email to customer
+export async function sendInvoice(orderId: string): Promise<{ success: boolean; message: string }> {
+  const adminToken = localStorage.getItem('adminToken') || '';
+  const response = await fetch('/api/invoice', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${adminToken}`,
+    },
+    body: JSON.stringify({ orderId }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to send invoice');
+  }
+
+  return await response.json();
+}
+
 // Download Tracking API (Vercel serverless function — works independently of edge function)
 export async function trackDownload(skinPackId: string): Promise<{ success: boolean; downloads: number }> {
   try {

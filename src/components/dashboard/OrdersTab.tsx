@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Package, User, Mail, DollarSign, Clock } from 'lucide-react';
+import { Plus, Package, User, Mail, DollarSign, Clock, Send, FileText, MoreVertical } from 'lucide-react';
 import { SkinPack } from '../../types';
 import * as api from '../../utils/api';
+import { toast } from 'sonner';
 
 interface OrdersTabProps {
   skinPacks: SkinPack[];
@@ -80,6 +81,34 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
       ));
     } catch (error) {
       console.error('Error updating order status:', error);
+    }
+  };
+
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+
+  const handleResendReceipt = async (orderId: string) => {
+    setActiveMenu(null);
+    try {
+      const result = await api.resendReceipt(orderId);
+      toast.success(result.message);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to resend receipt');
+    }
+  };
+
+  const handleViewInvoice = (orderId: string) => {
+    setActiveMenu(null);
+    const url = api.getInvoiceUrl(orderId);
+    window.open(url, '_blank');
+  };
+
+  const handleSendInvoice = async (orderId: string) => {
+    setActiveMenu(null);
+    try {
+      const result = await api.sendInvoice(orderId);
+      toast.success(result.message);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send invoice');
     }
   };
 
@@ -174,6 +203,7 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Amount</th>
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Status</th>
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Date</th>
+                <th className="px-6 py-4 text-left text-sm text-gray-400">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -185,7 +215,7 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
                 </tr>
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
                     No orders yet. Create your first order!
                   </td>
                 </tr>
@@ -222,6 +252,45 @@ export function OrdersTab({ skinPacks }: OrdersTabProps) {
                     </td>
                     <td className="px-6 py-4 text-gray-400">
                       {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="relative">
+                        <button
+                          onClick={() => setActiveMenu(activeMenu === order.id ? null : order.id)}
+                          className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                        >
+                          <MoreVertical className="w-4 h-4 text-gray-400" />
+                        </button>
+
+                        {activeMenu === order.id && (
+                          <>
+                            <div className="fixed inset-0 z-40" onClick={() => setActiveMenu(null)} />
+                            <div className="absolute right-0 top-10 z-50 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+                              <button
+                                onClick={() => handleResendReceipt(order.id)}
+                                className="w-full px-4 py-3 text-left text-sm hover:bg-slate-700 transition-colors flex items-center gap-3"
+                              >
+                                <Send className="w-4 h-4 text-orange-400" />
+                                <span>Resend Receipt Email</span>
+                              </button>
+                              <button
+                                onClick={() => handleViewInvoice(order.id)}
+                                className="w-full px-4 py-3 text-left text-sm hover:bg-slate-700 transition-colors flex items-center gap-3"
+                              >
+                                <FileText className="w-4 h-4 text-blue-400" />
+                                <span>View / Download Invoice</span>
+                              </button>
+                              <button
+                                onClick={() => handleSendInvoice(order.id)}
+                                className="w-full px-4 py-3 text-left text-sm hover:bg-slate-700 transition-colors flex items-center gap-3"
+                              >
+                                <Mail className="w-4 h-4 text-green-400" />
+                                <span>Send Invoice to Customer</span>
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
