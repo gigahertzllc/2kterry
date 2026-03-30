@@ -61,6 +61,35 @@ app.use(
   }),
 );
 
+// JWT-based admin auth middleware — validates Supabase token + admin record
+const requireAdmin = async (c: any, next: any) => {
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader) {
+    return c.json({ error: 'Unauthorized — no token provided' }, 401);
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) {
+      return c.json({ error: 'Unauthorized — invalid token' }, 401);
+    }
+
+    // Verify user is an admin
+    const adminData = await kv.get(`admin:${user.id}`);
+    if (!adminData) {
+      return c.json({ error: 'Forbidden — not an admin' }, 403);
+    }
+
+    // Attach admin info to context for downstream handlers
+    c.set('admin', adminData);
+    await next();
+  } catch (err) {
+    console.error('Auth middleware error:', err);
+    return c.json({ error: 'Authentication failed' }, 401);
+  }
+};
+
 // Health check endpoint
 app.get("/make-server-832015f7/health", (c) => {
   return c.json({ status: "ok" });
@@ -542,35 +571,6 @@ app.put("/make-server-832015f7/orders/:id", requireAdmin, async (c) => {
     return c.json({ error: 'Failed to update order' }, 500);
   }
 });
-
-// JWT-based admin auth middleware — validates Supabase token + admin record
-const requireAdmin = async (c: any, next: any) => {
-  const authHeader = c.req.header('Authorization');
-  if (!authHeader) {
-    return c.json({ error: 'Unauthorized — no token provided' }, 401);
-  }
-
-  const token = authHeader.replace('Bearer ', '');
-  try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    if (error || !user) {
-      return c.json({ error: 'Unauthorized — invalid token' }, 401);
-    }
-
-    // Verify user is an admin
-    const adminData = await kv.get(`admin:${user.id}`);
-    if (!adminData) {
-      return c.json({ error: 'Forbidden — not an admin' }, 403);
-    }
-
-    // Attach admin info to context for downstream handlers
-    c.set('admin', adminData);
-    await next();
-  } catch (err) {
-    console.error('Auth middleware error:', err);
-    return c.json({ error: 'Authentication failed' }, 401);
-  }
-};
 
 // Get all games
 app.get("/make-server-832015f7/games", async (c) => {
