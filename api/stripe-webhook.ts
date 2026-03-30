@@ -230,23 +230,28 @@ async function createDownloadToken(
   orderId: string,
   skinPackId: string,
   skinPackName: string,
-  customerEmail: string
+  customerEmail: string,
+  metadataR2Key?: string
 ): Promise<string> {
   try {
-    // Look up the skin pack to get its r2Key
-    const { data, error: fetchError } = await supabase
-      .from('kv_store_832015f7')
-      .select('value')
-      .eq('key', `skinpack:${skinPackId}`)
-      .single();
+    // Try to get r2Key from metadata first (most reliable), then fall back to DB lookup
+    let r2Key = metadataR2Key || '';
 
-    if (fetchError || !data) {
-      console.error('Error fetching skin pack for download token:', fetchError);
-      throw new Error('Skin pack not found');
+    if (!r2Key) {
+      const { data, error: fetchError } = await supabase
+        .from('kv_store_832015f7')
+        .select('value')
+        .eq('key', `skinpack:${skinPackId}`)
+        .single();
+
+      if (fetchError || !data) {
+        console.error('Skin pack not found in DB, and no r2Key in metadata — cannot create download token');
+        throw new Error('Skin pack not found and no r2Key available');
+      }
+
+      const skinPack = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+      r2Key = skinPack.r2Key || '';
     }
-
-    const skinPack = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
-    const r2Key = skinPack.r2Key || '';
 
     // Generate a unique download token
     const token = randomUUID();
@@ -284,14 +289,15 @@ async function createDownloadToken(
 
 async function resolveMetadata(
   session: Stripe.Checkout.Session
-): Promise<{ skinPackId: string; skinPackName: string }> {
+): Promise<{ skinPackId: string; skinPackName: string; r2Key: string }> {
   // 1. Try session.metadata first (set when using direct Checkout Sessions)
   const sessionMeta = session.metadata || {};
   let skinPackId = sessionMeta.skin_pack_id || sessionMeta.skinPackId || '';
   let skinPackName = sessionMeta.skin_pack_name || sessionMeta.skinPackName || '';
+  const r2Key = sessionMeta.r2_key || '';
 
   if (skinPackId) {
-    return { skinPackId, skinPackName };
+    return { skinPackId, skinPackName, r2Key };
   }
 
   // 2. Try payment link metadata (Payment Links don't copy metadata to session)
@@ -306,7 +312,7 @@ async function resolveMetadata(
       skinPackName = plMeta.skin_pack_name || plMeta.skinPackName || '';
       if (skinPackId) {
         console.log('Resolved metadata from payment link:', { skinPackId, skinPackName });
-        return { skinPackId, skinPackName };
+        return { skinPackId, skinPackName, r2Key: r2Key || plMeta.r2_key || '' };
       }
     } catch (err) {
       console.error('Error fetching payment link metadata:', err);
@@ -325,7 +331,7 @@ async function resolveMetadata(
         skinPackName = product.metadata.skin_pack_name || product.metadata.skinPackName || product.name || '';
         if (skinPackId) {
           console.log('Resolved metadata from product:', { skinPackId, skinPackName });
-          return { skinPackId, skinPackName };
+          return { skinPackId, skinPackName, r2Key: r2Key || product.metadata.r2_key || '' };
         }
       }
     }
@@ -333,7 +339,7 @@ async function resolveMetadata(
     console.error('Error fetching line items metadata:', err);
   }
 
-  return { skinPackId, skinPackName };
+  return { skinPackId, skinPackName, r2Key };
 }
 
 async function handleCheckoutSessionCompleted(
@@ -348,7 +354,7 @@ async function handleCheckoutSessionCompleted(
     const amount = session.amount_total ? session.amount_total / 100 : 0; // Convert from cents
 
     // Resolve metadata from session, payment link, or product (in that order)
-    const { skinPackId, skinPackName } = await resolveMetadata(session);
+    const { skinPackId, skinPackName, r2Key } = await resolveMetadata(session);
 
     if (!customerEmail || !skinPackId) {
       console.error('Missing required fields in checkout session', {
@@ -387,7 +393,8 @@ async function handleCheckoutSessionCompleted(
         orderId,
         skinPackId,
         skinPackName || 'Unknown Skin Pack',
-        customerEmail
+        customerEmail,
+        r2Key
       );
     } catch (err) {
       console.error('Failed to create download token (non-fatal):', err);
