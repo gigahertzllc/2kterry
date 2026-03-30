@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { sendReceiptEmail } from './send-receipt';
+import { sendReceiptEmail } from './_lib/send-receipt';
 import { validateAdmin, setCorsHeaders } from './_lib/auth';
 
 /**
