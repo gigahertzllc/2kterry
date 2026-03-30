@@ -12,7 +12,7 @@ import { uploadFileWithProgress, validateFile, formatFileSize } from '../../util
 interface SkinPacksTabProps {
   games: Game[];
   skinPacks: SkinPack[];
-  onAddSkinPack: (skinPack: Omit<SkinPack, 'id'>) => void;
+  onAddSkinPack: (skinPack: SkinPack) => void;
   onUpdateSkinPack: (id: string, skinPack: Omit<SkinPack, 'id'>) => void;
   onDeleteSkinPack: (id: string) => void;
 }
@@ -232,6 +232,8 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     const price = parseFloat(formData.price);
     const game = games.find(g => g.id === formData.gameId);
     const imagesToStore = uploadedImagePaths.length > 0 ? uploadedImagePaths : [game?.image || ''];
+    // Generate ID once upfront so Stripe metadata and DB record use the same value
+    const skinPackId = editingSkinPack?.id || Date.now().toString();
 
     let downloadUrl = modFilePublicUrl || editingSkinPack?.downloadUrl || '';
     let stripePaymentLink = editingSkinPack?.stripePaymentLink;
@@ -258,7 +260,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
             })(),
             downloadUrl,
             r2Key: modFileR2Key || undefined,
-            skinPackId: editingSkinPack?.id || Date.now().toString(),
+            skinPackId,
           });
 
           stripePaymentLink = stripeResult.stripePaymentLink;
@@ -274,7 +276,8 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
 
       setSubmitStep('Saving skin pack...');
 
-      const newSkinPack: Omit<SkinPack, 'id'> = {
+      const newSkinPack: SkinPack = {
+        id: skinPackId,
         name: formData.name,
         description: formData.description,
         price,

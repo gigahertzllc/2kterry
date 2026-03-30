@@ -11,7 +11,7 @@ import { SiteContentTab } from './dashboard/SiteContentTab';
 interface DashboardPageProps {
   games: Game[];
   skinPacks: SkinPack[];
-  onAddSkinPack: (skinPack: Omit<SkinPack, 'id'>) => void;
+  onAddSkinPack: (skinPack: SkinPack) => void;
   onUpdateSkinPack: (id: string, skinPack: Omit<SkinPack, 'id'>) => void;
   onDeleteSkinPack: (id: string) => void;
 }

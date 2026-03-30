@@ -172,15 +172,10 @@ export default function App() {
     }
   };
 
-  const handleAddSkinPack = async (newSkinPack: Omit<SkinPack, 'id'>) => {
+  const handleAddSkinPack = async (newSkinPack: SkinPack) => {
     try {
-      const skinPackWithId: SkinPack = {
-        ...newSkinPack,
-        id: Date.now().toString()
-      };
-
-      await api.createSkinPack(skinPackWithId);
-      setSkinPacks([skinPackWithId, ...skinPacks]);
+      await api.createSkinPack(newSkinPack);
+      setSkinPacks([newSkinPack, ...skinPacks]);
     } catch (error) {
       console.error('Error creating skin pack:', error);
       toast.error('Failed to create skin pack. Please try again.');
