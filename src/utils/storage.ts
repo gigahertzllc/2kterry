@@ -84,33 +84,12 @@ export function createUploadAbortController() {
 }
 
 /**
- * Get R2 configuration (for future use when R2 is configured)
- * Users will need to provide their R2 credentials
+ * R2 configuration stub — credentials are server-side only (in Vercel env vars).
+ * Client code should call backend API endpoints for R2 operations,
+ * never access R2 credentials directly.
  */
 export const R2_CONFIG = {
-  accountId: import.meta.env.VITE_R2_ACCOUNT_ID || '',
-  accessKeyId: import.meta.env.VITE_R2_ACCESS_KEY_ID || '',
-  secretAccessKey: import.meta.env.VITE_R2_SECRET_ACCESS_KEY || '',
-  bucketName: import.meta.env.VITE_R2_BUCKET_NAME || '',
-
-  isConfigured: function() {
-    return !!(
-      this.accountId &&
-      this.accessKeyId &&
-      this.secretAccessKey &&
-      this.bucketName
-    );
-  },
-
-  // Future: Implement R2 presigned URL generation
-  async getPresignedUploadUrl(filename: string) {
-    if (!this.isConfigured()) {
-      throw new Error('R2 not configured. Please set R2 credentials in environment variables.');
-    }
-    // This would call a backend endpoint to generate a presigned URL
-    // The endpoint would use AWS SDK to generate the URL
-    throw new Error('R2 upload not yet implemented. Use Supabase storage for now.');
-  }
+  isConfigured: () => false, // R2 ops handled server-side via /api/ endpoints
 };
 
 /**

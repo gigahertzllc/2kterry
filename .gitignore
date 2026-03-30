@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+.vercel/
+
+# Environment files — NEVER commit these
+.env
+.env.local
+.env.production
+.env.development
+.env.staging
+.env*.local
+
+# Supabase local
+supabase/.temp/
+supabase/functions/make-server-832015f7/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test
+coverage/
+
+# Misc
+*.tgz
+.cache/
