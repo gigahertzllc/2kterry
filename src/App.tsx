@@ -137,6 +137,7 @@ export default function App() {
     if (skinId) {
       setSelectedSkinId(skinId);
     }
+    window.scrollTo(0, 0);
   };
 
   const handleLogoClick = () => {
