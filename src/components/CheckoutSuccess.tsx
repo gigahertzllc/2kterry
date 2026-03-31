@@ -113,20 +113,41 @@ export function CheckoutSuccess({ skinPack, sessionId, onNavigate }: CheckoutSuc
 
                 {/* Message */}
                 <p className="text-gray-400 mb-8 max-w-xl mx-auto">
-                  Your purchase has been confirmed. Your download is ready below. Check your email
-                  for a receipt and setup instructions.
+                  Your purchase has been confirmed! Check your email for a receipt with your
+                  permanent download link. You can re-download anytime from that email.
                 </p>
 
-                {/* Download Button */}
-                <a
-                  href={downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all font-semibold mb-6"
+                {/* Download Button — only if we have a direct download URL */}
+                {skinPack?.downloadUrl && (
+                  <a
+                    href={downloadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all font-semibold mb-6"
+                  >
+                    <Download className="w-5 h-5" />
+                    <span>Download Now</span>
+                  </a>
+                )}
+
+                {/* Email Notice — shown when we don't have a direct download */}
+                {!skinPack?.downloadUrl && (
+                  <div className="mb-6 p-6 bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 rounded-xl">
+                    <h3 className="text-lg font-semibold text-orange-400 mb-2">Check Your Email</h3>
+                    <p className="text-gray-400">
+                      Your download link has been sent to the email you used at checkout.
+                      Click the download button in the email to get your mod files.
+                    </p>
+                  </div>
+                )}
+
+                {/* Browse More */}
+                <button
+                  onClick={() => onNavigate('shop')}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-slate-700 rounded-lg text-gray-400 hover:text-white hover:border-slate-500 transition-all"
                 >
-                  <Download className="w-5 h-5" />
-                  <span>Download Now</span>
-                </a>
+                  Browse More Mods
+                </button>
 
                 {/* Additional Info */}
                 <div className="mt-8 p-6 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 rounded-xl">

@@ -109,18 +109,20 @@ export default function App() {
     loadData();
   }, []);
 
-  // Check URL path and hash for direct admin access - on load and on hash changes
+  // Check URL hash for routing — admin access AND checkout success
   useEffect(() => {
-    const checkAdminAccess = () => {
+    const checkHashRoute = () => {
       const hash = window.location.hash.replace('#', '');
       const pathname = window.location.pathname;
       if (hash === 'admin' || pathname === '/admin') {
         setShowAdminLogin(true);
+      } else if (hash.startsWith('checkout/success')) {
+        setCurrentPage('checkout/success');
       }
     };
-    checkAdminAccess();
-    window.addEventListener('hashchange', checkAdminAccess);
-    return () => window.removeEventListener('hashchange', checkAdminAccess);
+    checkHashRoute();
+    window.addEventListener('hashchange', checkHashRoute);
+    return () => window.removeEventListener('hashchange', checkHashRoute);
   }, []);
 
   const handleNavigate = (page: string, skinId?: string) => {
@@ -254,7 +256,15 @@ export default function App() {
       )}
 
       {currentPage === 'checkout/success' && (
-        <CheckoutSuccess skinPack={selectedSkin} onNavigate={handleNavigate} />
+        <CheckoutSuccess
+          skinPack={selectedSkin}
+          sessionId={(() => {
+            const hash = window.location.hash;
+            const match = hash.match(/session_id=([^&]+)/);
+            return match ? match[1] : undefined;
+          })()}
+          onNavigate={handleNavigate}
+        />
       )}
 
       {currentPage === 'dashboard' && (
