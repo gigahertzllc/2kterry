@@ -7,8 +7,7 @@ const supabase = createClient(
 );
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // GET: list all orders, optionally clean test orders
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('kv_store_832015f7')
     .select('key, value')
     .like('key', 'order:%');
@@ -25,69 +24,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       amount: val.amount,
       status: val.status,
       createdAt: val.createdAt,
+      // Include full value so we can see everything
+      raw: val,
     };
   });
 
+  // Sort newest first
+  orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
   const action = req.query.action as string;
+  const keysParam = req.query.keys as string; // comma-separated keys to delete
 
-  if (action === 'clean-test') {
-    // Identify test orders: email contains "test", or skinPackName contains "TEST",
-    // or email is one of the known test emails
-    const testOrders = orders.filter(o => {
-      const email = (o.customerEmail || '').toLowerCase();
-      const name = (o.skinPackName || '').toLowerCase();
-      return (
-        email.includes('test') ||
-        name.includes('test') ||
-        email === '' ||
-        email.includes('@example.com')
-      );
-    });
-
+  if (action === 'delete' && keysParam) {
+    const keysToDelete = keysParam.split(',').map(k => k.trim());
     const deleted: string[] = [];
-    for (const order of testOrders) {
-      const { error: delErr } = await supabase
+    for (const key of keysToDelete) {
+      const { error } = await supabase
         .from('kv_store_832015f7')
         .delete()
-        .eq('key', order.key);
-      if (!delErr) deleted.push(order.key);
+        .eq('key', key);
+      if (!error) deleted.push(key);
     }
-
     const remaining = orders.filter(o => !deleted.includes(o.key));
     return res.json({
-      action: 'clean-test',
+      action: 'delete',
       deletedCount: deleted.length,
-      deleted: testOrders.map(o => ({ key: o.key, email: o.customerEmail, pack: o.skinPackName, amount: o.amount })),
+      deleted,
       remainingCount: remaining.length,
-      remaining: remaining.map(o => ({ key: o.key, email: o.customerEmail, pack: o.skinPackName, amount: o.amount, status: o.status })),
+      remaining: remaining.map(o => ({
+        key: o.key, email: o.customerEmail, pack: o.skinPackName,
+        amount: o.amount, status: o.status, created: o.createdAt,
+      })),
     });
   }
 
-  if (action === 'delete-all-test') {
-    // More aggressive: delete ALL non-real orders. Keep only orders from real customer emails.
-    // You can add known real emails here
-    const realEmails = ['walid.johnson@gmail.com'];
-
-    const testOrders = orders.filter(o => !realEmails.includes((o.customerEmail || '').toLowerCase()));
-
-    const deleted: string[] = [];
-    for (const order of testOrders) {
-      const { error: delErr } = await supabase
-        .from('kv_store_832015f7')
-        .delete()
-        .eq('key', order.key);
-      if (!delErr) deleted.push(order.key);
-    }
-
-    const remaining = orders.filter(o => !deleted.includes(o.key));
-    return res.json({
-      action: 'delete-all-test',
-      deletedCount: deleted.length,
-      deleted: testOrders.map(o => ({ key: o.key, email: o.customerEmail, pack: o.skinPackName, amount: o.amount })),
-      remainingCount: remaining.length,
-      remaining: remaining.map(o => ({ key: o.key, email: o.customerEmail, pack: o.skinPackName, amount: o.amount, status: o.status })),
-    });
-  }
-
-  return res.json({ count: orders.length, orders });
+  // Default: list all with full detail
+  return res.json({
+    count: orders.length,
+    orders: orders.map(o => ({
+      key: o.key,
+      email: o.customerEmail,
+      name: o.customerName,
+      pack: o.skinPackName,
+      packId: o.skinPackId,
+      amount: o.amount,
+      status: o.status,
+      created: o.createdAt,
+    })),
+  });
 }
