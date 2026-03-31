@@ -95,6 +95,34 @@ async function createStripeProduct(data: {
   return response.json();
 }
 
+// Update existing Stripe product when price or details change
+async function updateStripeProduct(data: {
+  stripeProductId: string;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl?: string;
+  downloadUrl?: string;
+  r2Key?: string;
+  skinPackId?: string;
+}): Promise<{ stripePaymentLink: string; stripeProductId: string; stripePriceId: string }> {
+  const response = await fetch('/api/update-product', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${api.getAdminToken()}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Failed to update product' }));
+    throw new Error(err.error || 'Failed to update Stripe product');
+  }
+
+  return response.json();
+}
+
 export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack, onDeleteSkinPack }: SkinPacksTabProps) {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [editingSkinPack, setEditingSkinPack] = useState<SkinPack | null>(null);
@@ -241,8 +269,18 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     let stripePriceId = editingSkinPack?.stripePriceId;
 
     try {
-      // If paid mod and no existing payment link — auto-create Stripe product
+      const imageUrl = (() => {
+        const img = imagesToStore[0];
+        if (!img) return undefined;
+        if (img.startsWith('http')) return img;
+        return `https://dxquofsanirdfonsnrqu.supabase.co/storage/v1/object/public/make-832015f7-images/${img}`;
+      })();
+
+      const priceChanged = editingSkinPack && editingSkinPack.price !== price;
+      const nameChanged = editingSkinPack && editingSkinPack.name !== formData.name;
+
       if (price > 0 && !stripePaymentLink) {
+        // New paid mod — create Stripe product from scratch
         setSubmitStep('Creating Stripe product & payment link...');
         toast.info('Setting up Stripe payment...');
 
@@ -251,13 +289,7 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
             name: formData.name,
             description: formData.description,
             price,
-            imageUrl: (() => {
-              const img = imagesToStore[0];
-              if (!img) return undefined;
-              // If already a full URL, use as-is; otherwise build the Supabase public URL
-              if (img.startsWith('http')) return img;
-              return `https://dxquofsanirdfonsnrqu.supabase.co/storage/v1/object/public/make-832015f7-images/${img}`;
-            })(),
+            imageUrl,
             downloadUrl,
             r2Key: modFileR2Key || undefined,
             skinPackId,
@@ -271,6 +303,32 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
         } catch (stripeErr) {
           console.error('Stripe error:', stripeErr);
           toast.error(`Stripe setup failed: ${stripeErr instanceof Error ? stripeErr.message : 'Unknown error'}. You can add the payment link manually later.`);
+        }
+      } else if (price > 0 && stripeProductId && (priceChanged || nameChanged)) {
+        // Existing paid mod with price or name change — update Stripe
+        setSubmitStep('Updating Stripe price...');
+        toast.info('Updating Stripe payment link...');
+
+        try {
+          const stripeResult = await updateStripeProduct({
+            stripeProductId,
+            name: formData.name,
+            description: formData.description,
+            price,
+            imageUrl,
+            downloadUrl,
+            r2Key: modFileR2Key || editingSkinPack?.r2Key || undefined,
+            skinPackId,
+          });
+
+          stripePaymentLink = stripeResult.stripePaymentLink;
+          stripeProductId = stripeResult.stripeProductId;
+          stripePriceId = stripeResult.stripePriceId;
+
+          toast.success('Stripe price updated!');
+        } catch (stripeErr) {
+          console.error('Stripe update error:', stripeErr);
+          toast.error(`Stripe update failed: ${stripeErr instanceof Error ? stripeErr.message : 'Unknown error'}. The old price may still be active on Stripe.`);
         }
       }
 
