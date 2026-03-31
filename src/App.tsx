@@ -61,54 +61,38 @@ export default function App() {
     }
   }
 
-  // Load data on mount
+  // Load data on mount — run all fetches in parallel for speed
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
+      setGames(defaultGames); // Games are static, set immediately
+
       try {
-        // Try to create default admin if none exist
-        try {
-          await api.adminSetup();
-        } catch (error) {
-          // Admin already exists, that's fine
-        }
+        // Fire admin setup in background (non-blocking, don't await)
+        api.adminSetup().catch(() => {});
+        api.initializeDatabase().catch(() => {});
 
-        // Initialize database with default games
-        await api.initializeDatabase();
+        // Load packs, site content, and testimonials in PARALLEL
+        const [allPacks, content, testimonialsResult] = await Promise.all([
+          loadPacks(),
+          api.getSiteContent().catch(() => defaultSiteContent),
+          api.getApprovedTestimonials().catch(() => ({ testimonials: [] as any[] })),
+        ]);
 
-        const allPacks = await loadPacks();
-        setGames(defaultGames);
         setSkinPacks(allPacks);
-        console.log(`Showing ${allPacks.length} total packs`);
+        setSiteContent(content);
 
-        // Load site content
-        try {
-          const content = await api.getSiteContent();
-          setSiteContent(content);
-        } catch (e) {
-          console.error('Error loading site content:', e);
-          setSiteContent(defaultSiteContent);
-        }
-
-        // Load testimonials — seed defaults if empty
-        try {
-          const { testimonials: dbTestimonials } = await api.getApprovedTestimonials();
-          if (dbTestimonials.length > 0) {
-            setTestimonials(dbTestimonials);
-          } else {
-            // Seed default testimonials on first run
-            for (const t of defaultTestimonials) {
-              try { await api.createTestimonial(t); } catch (e) { /* ignore */ }
-            }
-            setTestimonials(defaultTestimonials.map((t, i) => ({ ...t, id: `seed-${i}` })));
-          }
-        } catch (e) {
-          console.error('Error loading testimonials:', e);
+        if (testimonialsResult.testimonials.length > 0) {
+          setTestimonials(testimonialsResult.testimonials);
+        } else {
+          // Seed default testimonials on first run (background)
           setTestimonials(defaultTestimonials.map((t, i) => ({ ...t, id: `seed-${i}` })));
+          Promise.all(defaultTestimonials.map(t => api.createTestimonial(t).catch(() => {}))).catch(() => {});
         }
+
+        console.log(`Loaded ${allPacks.length} packs`);
       } catch (error) {
         console.error('Error loading data:', error);
-        setGames(defaultGames);
         setSkinPacks([]);
       } finally {
         setIsLoading(false);
