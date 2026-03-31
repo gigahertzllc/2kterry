@@ -14,6 +14,9 @@ export function CheckoutSuccess({ skinPack, sessionId, onNavigate }: CheckoutSuc
   const trackedRef = useRef(false);
 
   useEffect(() => {
+    // Clean the URL — remove the session_id and checkout hash so it's not sitting in the address bar
+    window.history.replaceState(null, '', window.location.pathname);
+
     if (sessionId) {
       const timer = setTimeout(() => {
         setIsVerifying(false);
