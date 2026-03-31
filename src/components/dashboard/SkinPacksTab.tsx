@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
-import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil, CheckCircle2, AlertCircle, Cloud, Loader2, Eye, EyeOff, GripVertical, RefreshCw } from 'lucide-react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { Upload, Plus, X, Image as ImageIcon, Package, Trash2, Pencil, CheckCircle2, AlertCircle, Cloud, Loader2, Eye, EyeOff, GripVertical, RefreshCw, DollarSign } from 'lucide-react';
 import { Game, SkinPack } from '../../types';
 import * as api from '../../utils/api';
 import { toast } from 'sonner';
@@ -126,6 +126,8 @@ async function updateStripeProduct(data: {
 export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack, onDeleteSkinPack }: SkinPacksTabProps) {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [editingSkinPack, setEditingSkinPack] = useState<SkinPack | null>(null);
+  // Track purchases per skin pack from actual orders
+  const [purchasesMap, setPurchasesMap] = useState<Record<string, { count: number; revenue: number }>>({});
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -135,6 +137,25 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
     fileSizeUnit: 'MB',
     featured: false,
   });
+
+  // Fetch orders and build purchases map
+  useEffect(() => {
+    api.getOrders().then((orders: any[]) => {
+      const map: Record<string, { count: number; revenue: number }> = {};
+      for (const order of orders) {
+        if (order.status === 'completed' && order.skinPackId) {
+          if (!map[order.skinPackId]) {
+            map[order.skinPackId] = { count: 0, revenue: 0 };
+          }
+          map[order.skinPackId].count += 1;
+          map[order.skinPackId].revenue += order.amount || 0;
+        }
+      }
+      setPurchasesMap(map);
+    }).catch(() => {
+      // Orders may not be loaded yet
+    });
+  }, [skinPacks]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadedImagePaths, setUploadedImagePaths] = useState<string[]>([]);
   const [imageUploadProgress, setImageUploadProgress] = useState<{ [key: string]: number }>({});
@@ -540,12 +561,22 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
           </div>
         </div>
 
+        <div className="p-6 bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-2xl">
+          <div className="flex items-center gap-3 mb-2">
+            <DollarSign className="w-5 h-5 text-green-400" />
+            <span className="text-sm text-gray-400">Total Purchases</span>
+          </div>
+          <div className="text-3xl">
+            {Object.values(purchasesMap).reduce((sum, p) => sum + p.count, 0)}
+          </div>
+        </div>
+
         <div className="p-6 bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 rounded-2xl">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-sm text-gray-400">Total Revenue</span>
           </div>
           <div className="text-3xl">
-            ${(skinPacks.reduce((sum, skin) => sum + (skin.price * skin.downloads), 0) / 1000).toFixed(1)}k
+            ${Object.values(purchasesMap).reduce((sum, p) => sum + p.revenue, 0).toFixed(2)}
           </div>
         </div>
 
@@ -573,6 +604,8 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Game</th>
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Price</th>
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Downloads</th>
+                <th className="px-6 py-4 text-left text-sm text-gray-400">Purchases</th>
+                <th className="px-6 py-4 text-left text-sm text-gray-400">Revenue</th>
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Rating</th>
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Date</th>
                 <th className="px-6 py-4 text-left text-sm text-gray-400">Visible</th>
@@ -607,6 +640,16 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
                     )}
                   </td>
                   <td className="px-6 py-4">{skin.downloads.toLocaleString()}</td>
+                  <td className="px-6 py-4">
+                    <span className={purchasesMap[skin.id]?.count ? 'text-green-400' : 'text-gray-500'}>
+                      {purchasesMap[skin.id]?.count || 0}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={purchasesMap[skin.id]?.revenue ? 'text-orange-400' : 'text-gray-500'}>
+                      ${(purchasesMap[skin.id]?.revenue || 0).toFixed(2)}
+                    </span>
+                  </td>
                   <td className="px-6 py-4">{skin.rating}</td>
                   <td className="px-6 py-4 text-gray-400">{new Date(skin.dateAdded).toLocaleDateString()}</td>
                   <td className="px-6 py-4">
