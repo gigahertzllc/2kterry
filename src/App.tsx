@@ -15,8 +15,15 @@ import { defaultTestimonials } from './data/testimonials';
 import { defaultSiteContent } from './data/defaultSiteContent';
 import { toast, Toaster } from 'sonner';
 
+function getInitialPage(): string {
+  const hash = window.location.hash.replace('#', '');
+  if (hash.startsWith('checkout/success')) return 'checkout/success';
+  if (hash === 'admin') return 'home'; // admin is handled via modal, not page
+  return 'home';
+}
+
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState(getInitialPage);
   const [selectedSkinId, setSelectedSkinId] = useState<string | null>(null);
   const [skinPacks, setSkinPacks] = useState<SkinPack[]>([]);
   const [games, setGames] = useState<any[]>([]);
