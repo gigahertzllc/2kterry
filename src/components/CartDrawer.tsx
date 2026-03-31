@@ -41,7 +41,9 @@ export function CartDrawer() {
 
         const data = await response.json();
         if (data.url) {
-          clearCart();
+          // Don't clear cart yet — only clear after successful purchase
+          // (CheckoutSuccess page will clear it)
+          closeCart();
           window.location.href = data.url;
         } else {
           toast.error('Failed to create checkout session');

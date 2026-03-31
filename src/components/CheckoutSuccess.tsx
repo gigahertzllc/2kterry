@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CheckCircle, Download, ArrowLeft } from 'lucide-react';
 import { SkinPack } from '../types';
 import { trackDownload } from '../utils/api';
+import { useCart } from '../context/CartContext';
 
 interface CheckoutSuccessProps {
   skinPack?: SkinPack;
@@ -10,10 +11,13 @@ interface CheckoutSuccessProps {
 }
 
 export function CheckoutSuccess({ skinPack, sessionId, onNavigate }: CheckoutSuccessProps) {
+  const { clearCart } = useCart();
   const [isVerifying, setIsVerifying] = useState(!!sessionId);
   const trackedRef = useRef(false);
 
   useEffect(() => {
+    // Purchase succeeded — clear the cart
+    clearCart();
     // Clean the URL — remove the session_id and checkout hash so it's not sitting in the address bar
     window.history.replaceState(null, '', window.location.pathname);
 
