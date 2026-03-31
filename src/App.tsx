@@ -14,6 +14,8 @@ import * as api from './utils/api';
 import { defaultTestimonials } from './data/testimonials';
 import { defaultSiteContent } from './data/defaultSiteContent';
 import { toast, Toaster } from 'sonner';
+import { CartProvider } from './context/CartContext';
+import { CartDrawer } from './components/CartDrawer';
 
 function getInitialPage(): string {
   const hash = window.location.hash.replace('#', '');
@@ -232,7 +234,9 @@ export default function App() {
   const featuredSkins = activePacks.filter(skin => skin.featured);
 
   return (
+    <CartProvider>
     <div className="min-h-screen">
+      <CartDrawer />
       <Navigation
         currentPage={currentPage}
         onNavigate={handleNavigate}
@@ -360,5 +364,6 @@ export default function App() {
         </div>
       </footer>
     </div>
+    </CartProvider>
   );
 }

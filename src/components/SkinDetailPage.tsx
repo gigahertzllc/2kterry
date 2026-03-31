@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { ArrowLeft, Download, Star, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Download, Star, ShoppingCart, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { SkinPack } from '../types';
 import { toast } from 'sonner';
 import { trackDownload } from '../utils/api';
+import { useCart } from '../context/CartContext';
 
 interface SkinDetailPageProps {
   skin: SkinPack;
@@ -11,6 +12,7 @@ interface SkinDetailPageProps {
 }
 
 export function SkinDetailPage({ skin, onNavigate, onDownloadTracked }: SkinDetailPageProps) {
+  const { addItem, isInCart } = useCart();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [downloadCount, setDownloadCount] = useState(skin.downloads);
@@ -158,22 +160,49 @@ export function SkinDetailPage({ skin, onNavigate, onDownloadTracked }: SkinDeta
                   {skin.price !== 0 && <span className="text-gray-400">USD</span>}
                 </div>
 
-                <button
-                  onClick={handleCheckout}
-                  className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-3 group mb-4"
-                >
-                  {skin.price === 0 ? (
-                    <>
-                      <Download className="w-5 h-5" />
-                      <span>Download Free</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="w-5 h-5" />
+                {skin.price === 0 ? (
+                  <button
+                    onClick={handleCheckout}
+                    className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-3 group mb-4"
+                  >
+                    <Download className="w-5 h-5" />
+                    <span>Download Free</span>
+                  </button>
+                ) : (
+                  <div className="flex gap-3 mb-4">
+                    <button
+                      onClick={() => {
+                        if (!isInCart(skin.id)) {
+                          addItem(skin);
+                          toast.success(`${skin.name} added to cart`);
+                        }
+                      }}
+                      className={`flex-1 py-4 rounded-lg flex items-center justify-center gap-3 transition-all ${
+                        isInCart(skin.id)
+                          ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                          : 'bg-slate-800 border border-slate-700 text-white hover:border-orange-500/30 hover:bg-slate-700'
+                      }`}
+                    >
+                      {isInCart(skin.id) ? (
+                        <>
+                          <Check className="w-5 h-5" />
+                          <span>In Cart</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingCart className="w-5 h-5" />
+                          <span>Add to Cart</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={handleCheckout}
+                      className="flex-1 py-4 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-3"
+                    >
                       <span>Buy Now — ${skin.price}</span>
-                    </>
-                  )}
-                </button>
+                    </button>
+                  </div>
+                )}
 
               </div>
 

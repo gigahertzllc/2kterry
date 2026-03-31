@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Download, Star, Filter, TrendingUp, Sparkles } from 'lucide-react';
+import { Download, Star, Filter, TrendingUp, Sparkles, ShoppingCart, Check } from 'lucide-react';
 import { Game, SkinPack } from '../types';
+import { useCart } from '../context/CartContext';
+import { toast } from 'sonner';
 
 interface ShopPageProps {
   games: Game[];
@@ -9,6 +11,7 @@ interface ShopPageProps {
 }
 
 export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
+  const { addItem, isInCart } = useCart();
   const [selectedGame, setSelectedGame] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'price'>('newest');
 
@@ -183,8 +186,28 @@ export function ShopPage({ games, skinPacks, onNavigate }: ShopPageProps) {
                   <div className="text-2xl bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent">
                     {skin.price === 0 ? 'FREE' : `$${skin.price}`}
                   </div>
-                  <div className="px-4 py-2 bg-gradient-to-r from-orange-500/10 to-orange-500/10 border border-orange-500/20 rounded-lg text-sm text-orange-400 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition-all">
-                    View Details
+                  <div className="flex items-center gap-2">
+                    {skin.price > 0 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isInCart(skin.id)) {
+                            addItem(skin);
+                            toast.success(`${skin.name} added to cart`);
+                          }
+                        }}
+                        className={`p-2 rounded-lg transition-all ${
+                          isInCart(skin.id)
+                            ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                            : 'bg-slate-800 border border-slate-700 text-gray-400 hover:text-orange-400 hover:border-orange-500/30'
+                        }`}
+                      >
+                        {isInCart(skin.id) ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+                      </button>
+                    )}
+                    <div className="px-4 py-2 bg-gradient-to-r from-orange-500/10 to-orange-500/10 border border-orange-500/20 rounded-lg text-sm text-orange-400 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition-all">
+                      {skin.price === 0 ? 'Download Free' : 'View Details'}
+                    </div>
                   </div>
                 </div>
               </div>

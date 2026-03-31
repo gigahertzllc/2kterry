@@ -1,5 +1,6 @@
-import { ShoppingBag, LayoutDashboard, Home, Heart, Info, BookOpen } from 'lucide-react';
+import { ShoppingBag, LayoutDashboard, Home, Heart, Info, BookOpen, ShoppingCart } from 'lucide-react';
 import { useState, useRef } from 'react';
+import { useCart } from '../context/CartContext';
 
 interface NavigationProps {
   currentPage: string;
@@ -9,6 +10,7 @@ interface NavigationProps {
 }
 
 export function Navigation({ currentPage, onNavigate, onLogoClick, onAdminAccess }: NavigationProps) {
+  const { toggleCart, itemCount } = useCart();
   const [pressProgress, setPressProgress] = useState(0);
   const pressTimer = useRef<number | null>(null);
   const progressInterval = useRef<number | null>(null);
@@ -146,6 +148,19 @@ export function Navigation({ currentPage, onNavigate, onLogoClick, onAdminAccess
             >
               <Heart className="w-4 h-4" />
               <span>Donation</span>
+            </button>
+
+            {/* Cart Button */}
+            <button
+              onClick={toggleCart}
+              className="relative px-4 py-2 flex items-center gap-2 text-gray-300 hover:text-white hover:bg-slate-800 transition-all ml-2"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-0 w-5 h-5 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  {itemCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
