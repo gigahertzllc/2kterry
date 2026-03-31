@@ -140,10 +140,11 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
 
   // Fetch orders and build purchases map
   useEffect(() => {
-    api.getOrders().then((orders: any[]) => {
+    api.getOrders().then((data: any) => {
+      const orders = data.orders || [];
       const map: Record<string, { count: number; revenue: number }> = {};
       for (const order of orders) {
-        if (order.status === 'completed' && order.skinPackId) {
+        if (order.skinPackId) {
           if (!map[order.skinPackId]) {
             map[order.skinPackId] = { count: 0, revenue: 0 };
           }
@@ -152,8 +153,8 @@ export function SkinPacksTab({ games, skinPacks, onAddSkinPack, onUpdateSkinPack
         }
       }
       setPurchasesMap(map);
-    }).catch(() => {
-      // Orders may not be loaded yet
+    }).catch((err) => {
+      console.error('Failed to load orders for purchases map:', err);
     });
   }, [skinPacks]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
