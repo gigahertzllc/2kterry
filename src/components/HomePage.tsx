@@ -45,7 +45,8 @@ export function HomePage({ siteContent, latestSkins, featuredSkins, testimonials
           <img
             src="/images/brand/hero.jpg"
             alt=""
-            className="absolute inset-0 w-full h-full object-cover object-top"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: 'center 15%' }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/30 to-transparent"></div>
           <div className="absolute inset-0 bg-gradient-to-b from-slate-950/50 via-transparent to-slate-950"></div>
